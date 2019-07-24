@@ -5,9 +5,7 @@ import {initScene} from './app'
 var mapIndexedImage;
 var mapOutlineImage;
 
-//	contains a list of country code to country name for running lookups
-var selectableCountries = [];
-
+// Main program entry
 function start() {
     if(!Detector.webgl) {
         Detector.addGetWebGLMessage();
@@ -26,7 +24,6 @@ function start() {
                             dataObject['outlineImage'] = mapOutlineImage;
                             dataObject['selectableCountries'] =[];
                             dataObject['countryData'] = {};
-                            console.log(dataObject);
                             initScene(dataObject);
                         })
                     })

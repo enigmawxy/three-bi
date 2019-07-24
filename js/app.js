@@ -2,6 +2,7 @@ import {Scene, AmbientLight, SpotLight, PointLight, Object3D,
         Texture, NearestFilter, ShaderMaterial, Mesh, SphereGeometry
         } from '../lib/three/three.module'
 import {loadGeoData} from './geopins';
+import {buildDataVizGeometries} from './visualize';
 
 import '../lib/jquery-1.7.1.min'
 
@@ -86,16 +87,14 @@ export function initScene(spec) {
         }
     }
 
-    // console.log(spec.selectableCountries);
-
     // load geo data (country lat lons in this case)
     console.time('loadGeoData');
     loadGeoData(spec);
     console.timeEnd('loadGeoData');
 
-    // console.time('buildDataVizGeometries');
-    // var vizilines = buildDataVizGeometries(timeBins);
-    // console.timeEnd('buildDataVizGeometries');
+    console.time('buildDataVizGeometries');
+    var vizilines = buildDataVizGeometries(spec);
+    console.timeEnd('buildDataVizGeometries');
 
     // var visualizationMesh = new Object3D();
     // rotating.add(visualizationMesh);
