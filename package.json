@@ -1,0 +1,29 @@
+{
+  "name": "three-bi",
+  "version": "1.0.0",
+  "description": "a business intelligence in three.js",
+  "main": "index.js",
+  "scripts": {
+    "start": "parcel index.html --open",
+    "build": "parcel build index.html",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/enigmawxy/three-bi.git"
+  },
+  "keywords": [
+    "bi",
+    "three.js",
+    "sphere"
+  ],
+  "author": "Thomas Ong",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/enigmawxy/three-bi/issues"
+  },
+  "homepage": "https://github.com/enigmawxy/three-bi#readme",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.3"
+  }
+}
