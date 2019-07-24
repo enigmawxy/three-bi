@@ -2,9 +2,8 @@ import {Scene, AmbientLight, SpotLight, PointLight, Object3D,
         Texture, NearestFilter, ShaderMaterial, Mesh, SphereGeometry
         } from '../lib/three/three.module'
 import {loadGeoData} from './geopins';
-import {buildDataVizGeometries} from './visualize';
-
 import '../lib/jquery-1.7.1.min'
+import {buildDataVizGeometries, selectVisualization} from './visualize';
 
 export function initScene(spec) {
     var scene = new Scene();
@@ -31,11 +30,13 @@ export function initScene(spec) {
     var lookupCanvas = document.createElement('canvas');
     lookupCanvas.width = 256;
     lookupCanvas.height = 1;
+    spec.lookup.canvas = lookupCanvas;
 
     var lookupTexture = new Texture(lookupCanvas);
     lookupTexture.magFilter = NearestFilter;
     lookupTexture.minFilter = NearestFilter;
     lookupTexture.needsUpdate = true;
+    spec.lookup.texture = lookupTexture;
 
     var indexedMapTexture = new Texture(spec.indexImage);
     indexedMapTexture.needsUpdate = true;
@@ -96,6 +97,10 @@ export function initScene(spec) {
     var vizilines = buildDataVizGeometries(spec);
     console.timeEnd('buildDataVizGeometries');
 
-    // var visualizationMesh = new Object3D();
-    // rotating.add(visualizationMesh);
+    var visualizationMesh = new Object3D();
+    rotating.add(visualizationMesh);
+
+    // buildGUI(); 忽略
+    selectVisualization( spec, rotating, visualizationMesh,'2010', ['UNITED STATES'], ['Military Weapons','Civilian Weapons', 'Ammunition'], ['Military Weapons','Civilian Weapons', 'Ammunition'] );
+
 }

@@ -1,5 +1,13 @@
-import {Vector3, CubicBezierCurve3, Curve} from "../lib/three/three.module";
+import {
+	Vector3, CubicBezierCurve3, Geometry, Color, GeometryUtils, Line,
+	AdditiveBlending, ShaderMaterial, LineBasicMaterial, TextureLoader,
+	NormalBlending, PointsMaterial, Points
+} from "../lib/three/three.module";
+
 import {createUtilLineGeometry} from './util';
+import {removeMarkerFromCountry, attachMarkerToCountry} from  './markers'
+import {setRotate, setRotateV, getRoateVY, getRotateVX} from './mousekeyboard';
+import {d3Graphs} from './ui.controls_test';
 
 var globeRadius = 1000;
 var vec3_origin = new Vector3(0,0,0);
@@ -147,7 +155,7 @@ function constrain(v, min, max){
 	return v;
 }
 
-export function getVisualizedMesh( linearData, year, countries, exportCategories, importCategories ){
+export function getVisualizedMesh( spec, year, countries, exportCategories, importCategories ){
 	//	for comparison purposes, all caps the country names
 	for( var i in countries ){
 		countries[i] = countries[i].toUpperCase();
@@ -155,22 +163,18 @@ export function getVisualizedMesh( linearData, year, countries, exportCategories
 
 	//	pick out the year first from the data
 	var indexFromYear = parseInt(year) - 1992;
-	if( indexFromYear >= timeBins.length )
-		indexFromYear = timeBins.length-1;
+	if( indexFromYear >= spec.timeBins.length )
+		indexFromYear = spec.timeBins.length-1;
 
 	var affectedCountries = [];
 
-	var bin = linearData[indexFromYear].data;	
+	var bin = spec.timeBins[indexFromYear].data;
 
-	var linesGeo = new THREE.Geometry();
+	var linesGeo = new Geometry();
 	var lineColors = [];
 
-	var particlesGeo = new THREE.Geometry();
-	var particleColors = [];			
-
-	// var careAboutExports = ( action === 'exports' );
-	// var careAboutImports = ( action === 'imports' );
-	// var careAboutBoth = ( action === 'both' );
+	var particlesGeo = new Geometry();
+	var particleColors = [];
 
 	//	go through the data from year, and find all relevant geometries
 	for( i in bin ){
@@ -185,7 +189,7 @@ export function getVisualizedMesh( linearData, year, countries, exportCategories
 		var useExporter = relevantExport;
 		var useImporter = relevantImport;
 
-		var categoryName = reverseWeaponLookup[set.wc];
+		var categoryName = spec.reverseWeaponLookup[set.wc];
 		var relevantExportCategory = relevantExport && $.inArray(categoryName,exportCategories) >= 0;		
 		var relevantImportCategory = relevantImport && $.inArray(categoryName,importCategories) >= 0;		
 
@@ -196,22 +200,24 @@ export function getVisualizedMesh( linearData, year, countries, exportCategories
 
 			var thisLineIsExport = false;
 
-			if(exporterName === selectedCountry.countryName ){
+			if(exporterName === spec.selectedCountry.countryName ){
 				thisLineIsExport = true;
 			}
 
-			var lineColor = thisLineIsExport ? new THREE.Color(exportColor) : new THREE.Color(importColor);
+			// var lineColor = thisLineIsExport ? new Color(exportColor) : new Color(importColor);
+			var lineColor = thisLineIsExport ? new Color(0xdd380c) : new Color(0x154492);
 
 			var lastColor;
 			//	grab the colors from the vertices
 			for( s in set.lineGeometry.vertices ){
-				var v = set.lineGeometry.vertices[s];		
+				const v = set.lineGeometry.vertices[s];
 				lineColors.push(lineColor);
 				lastColor = lineColor;
 			}
 
 			//	merge it all together
-			THREE.GeometryUtils.merge( linesGeo, set.lineGeometry );
+			GeometryUtils.merge( linesGeo, set.lineGeometry );
+			// Geometry.merge( linesGeo, set.lineGeometry );
 
 			var particleColor = lastColor.clone();		
 			var points = set.lineGeometry.vertices;
@@ -219,9 +225,6 @@ export function getVisualizedMesh( linearData, year, countries, exportCategories
 			particleCount = constrain(particleCount,1,100);
 			var particleSize = set.lineGeometry.size;			
 			for( var s=0; s<particleCount; s++ ){
-				// var rIndex = Math.floor( Math.random() * points.length );
-				// var rIndex = Math.min(s,points.length-1);
-
 				var desiredIndex = s / particleCount * points.length;
 				var rIndex = constrain(Math.floor(desiredIndex),0,points.length-1);
 
@@ -247,7 +250,7 @@ export function getVisualizedMesh( linearData, year, countries, exportCategories
 			}
 
 			var vb = set.v;
-			var exporterCountry = countryData[exporterName];
+			var exporterCountry = spec.countryData[exporterName];
 			if( exporterCountry.mapColor === undefined ){
 				exporterCountry.mapColor = vb;
 			}
@@ -255,7 +258,7 @@ export function getVisualizedMesh( linearData, year, countries, exportCategories
 				exporterCountry.mapColor += vb;
 			}			
 
-			var importerCountry = countryData[importerName];
+			var importerCountry = spec.countryData[importerName];
 			if( importerCountry.mapColor === undefined ){
 				importerCountry.mapColor = vb;
 			}
@@ -266,20 +269,18 @@ export function getVisualizedMesh( linearData, year, countries, exportCategories
 			exporterCountry.exportedAmount += vb;
 			importerCountry.importedAmount += vb;
 
-			if( exporterCountry === selectedCountry ){
-				selectedCountry.summary.exported[set.wc] += set.v;
-				selectedCountry.summary.exported.total += set.v;				
+			if( exporterCountry === spec.selectedCountry ){
+				spec.selectedCountry.summary.exported[set.wc] += set.v;
+				spec.selectedCountry.summary.exported.total += set.v;
 			}		
-			if( importerCountry === selectedCountry ){
-				selectedCountry.summary.imported[set.wc] += set.v;
-				selectedCountry.summary.imported.total += set.v;
+			if( importerCountry === spec.selectedCountry ){
+				spec.selectedCountry.summary.imported[set.wc] += set.v;
+				spec.selectedCountry.summary.imported.total += set.v;
 			}
 
-			if( importerCountry === selectedCountry || exporterCountry === selectedCountry ){
-				selectedCountry.summary.total += set.v;	
+			if( importerCountry === spec.selectedCountry || exporterCountry === spec.selectedCountry ){
+				spec.selectedCountry.summary.total += set.v;
 			}
-
-
 		}		
 	}
 
@@ -288,9 +289,9 @@ export function getVisualizedMesh( linearData, year, countries, exportCategories
 	linesGeo.colors = lineColors;	
 
 	//	make a final mesh out of this composite
-	var splineOutline = new THREE.Line( linesGeo, new THREE.LineBasicMaterial( 
+	var splineOutline = new Line( linesGeo, new LineBasicMaterial(
 		{ 	color: 0xffffff, opacity: 1.0, blending: 
-			THREE.AdditiveBlending, transparent:true, 
+			AdditiveBlending, transparent:true,
 			depthWrite: false, vertexColors: true, 
 			linewidth: 1 } ) 
 	);
@@ -298,25 +299,25 @@ export function getVisualizedMesh( linearData, year, countries, exportCategories
 	splineOutline.renderDepth = false;
 
 
-	attributes = {
+	var attributes = {
 		size: {	type: 'f', value: [] },
 		customColor: { type: 'c', value: [] }
 	};
 
-	uniforms = {
+	var uniforms = {
 		amplitude: { type: "f", value: 1.0 },
-		color:     { type: "c", value: new THREE.Color( 0xffffff ) },
-		texture:   { type: "t", value: 0, texture: THREE.ImageUtils.loadTexture( "images/particleA.png" ) },
+		color:     { type: "c", value: new Color( 0xffffff ) },
+		texture:   { type: "t", value: 0, texture: new TextureLoader().load("images/particleA.png" ) },
 	};
 
-	var shaderMaterial = new THREE.ShaderMaterial( {
+	var shaderMaterial = new ShaderMaterial( {
 
 		uniforms: 		uniforms,
-		attributes:     attributes,
+		// attributes:     attributes, // No such attributes in current three version
 		vertexShader:   document.getElementById( 'vertexshader' ).textContent,
 		fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
 
-		blending: 		THREE.AdditiveBlending,
+		blending: 		AdditiveBlending,
 		depthTest: 		true,
 		depthWrite: 	false,
 		transparent:	true,
@@ -325,13 +326,18 @@ export function getVisualizedMesh( linearData, year, countries, exportCategories
 
 
 
-	var particleGraphic = THREE.ImageUtils.loadTexture("images/map_mask.png");
-	var particleMat = new THREE.ParticleBasicMaterial( { map: particleGraphic, color: 0xffffff, size: 60, 
-														blending: THREE.NormalBlending, transparent:true, 
+	var particleGraphic = new TextureLoader().load("images/map_mask.png");
+	// var particleMat = new ParticleBasicMaterial( { map: particleGraphic, color: 0xffffff, size: 60,
+	// 													blending: NormalBlending, transparent:true,
+	// 													depthWrite: false, vertexColors: true,
+	// 													sizeAttenuation: true } );
+	var particleMat = new PointsMaterial( { map: particleGraphic, color: 0xffffff, size: 60,
+														blending: NormalBlending, transparent:true,
 														depthWrite: false, vertexColors: true,
 														sizeAttenuation: true } );
 	particlesGeo.colors = particleColors;
-	var pSystem = new THREE.ParticleSystem( particlesGeo, shaderMaterial );
+	// var pSystem = new ParticleSystem( particlesGeo, shaderMaterial );
+	var pSystem = new Points( particlesGeo, shaderMaterial );
 	pSystem.dynamic = true;
 	splineOutline.add( pSystem );
 
@@ -379,15 +385,15 @@ export function getVisualizedMesh( linearData, year, countries, exportCategories
 	return splineOutline;	
 }
 
-function selectVisualization( linearData, year, countries, exportCategories, importCategories ){
+export function selectVisualization( spec, rotating, visualizationMesh, year, countries, exportCategories, importCategories ){
 	//	we're only doing one country for now so...
 	var cName = countries[0].toUpperCase();
 	
 	$("#hudButtons .countryTextInput").val(cName);
-	previouslySelectedCountry = selectedCountry;
-	selectedCountry = countryData[countries[0].toUpperCase()];
+	spec.previouslySelectedCountry = spec.selectedCountry;
+	spec.selectedCountry = spec.countryData[countries[0].toUpperCase()];
     
-	selectedCountry.summary = {
+	spec.selectedCountry.summary = {
 		imported: {
 			mil: 0,
 			civ: 0,
@@ -401,22 +407,20 @@ function selectVisualization( linearData, year, countries, exportCategories, imp
 			total: 0,
 		},
 		total: 0,
-		historical: getHistoricalData(selectedCountry),
+		historical: getHistoricalData(spec),
 	};
 
-	// console.log(selectedCountry);
-
 	//	clear off the country's internally held color data we used from last highlight
-	for( var i in countryData ){
-		var country = countryData[i];
+	for( var i in spec.countryData ){
+		var country = spec.countryData[i];
 		country.exportedAmount = 0;
 		country.importedAmount = 0;
 		country.mapColor = 0;
 	}
 
 	//	clear markers
-	for( var i in selectableCountries ){
-		removeMarkerFromCountry( selectableCountries[i] );
+	for( var i in spec.selectableCountries ){
+		removeMarkerFromCountry( spec.selectableCountries[i], spec.countryData );
 	}
 
 	//	clear children
@@ -427,7 +431,7 @@ function selectVisualization( linearData, year, countries, exportCategories, imp
 
 	//	build the mesh
 	console.time('getVisualizedMesh');
-	var mesh = getVisualizedMesh( timeBins, year, countries, exportCategories, importCategories );				
+	var mesh = getVisualizedMesh(spec, year, countries, exportCategories, importCategories );
 	console.timeEnd('getVisualizedMesh');
 
 	//	add it to scene graph
@@ -441,17 +445,18 @@ function selectVisualization( linearData, year, countries, exportCategories, imp
 
 	for( var i in mesh.affectedCountries ){
 		var countryName = mesh.affectedCountries[i];
-		var country = countryData[countryName];
-		attachMarkerToCountry( countryName, country.mapColor );
+		var country = spec.countryData[countryName];
+		attachMarkerToCountry( spec, countryName, country.mapColor );
 	}
 
 	// console.log( mesh.affectedCountries );
-	highlightCountry( mesh.affectedCountries );
+	highlightCountry( spec, mesh.affectedCountries );
 
-	if( previouslySelectedCountry !== selectedCountry ){
-		if( selectedCountry ){
-			rotateTargetX = selectedCountry.lat * Math.PI/180;
-			var targetY0 = -(selectedCountry.lon - 9) * Math.PI / 180;
+	if( spec.previouslySelectedCountry !== spec.selectedCountry ){
+		if( spec.selectedCountry ){
+			var rotateTargetX = spec.selectedCountry.lat * Math.PI/180;
+			var rotateTargetY;
+			var targetY0 = -(spec.selectedCountry.lon - 9) * Math.PI / 180;
             var piCounter = 0;
 			while(true) {
                 var targetY0Neg = targetY0 - Math.PI * 2 * piCounter;
@@ -466,17 +471,113 @@ function selectVisualization( linearData, year, countries, exportCategories, imp
                 piCounter++;
                 rotateTargetY = wrap(targetY0, -Math.PI, Math.PI);
 			}
-            // console.log(rotateTargetY);
-            //lines commented below source of rotation error
-			//is there a more reliable way to ensure we don't rotate around the globe too much? 
-			/*
-			if( Math.abs(rotateTargetY - rotating.rotation.y) > Math.PI )
-				rotateTargetY += Math.PI;		
-			*/
-			rotateVX *= 0.6;
-			rotateVY *= 0.6;		
+
+			setRotate(rotateTargetX, rotateTargetY);
+			// rotateVX *= 0.6;
+			// rotateVY *= 0.6;
+			setRotateV(getRotateVX() * 0.6, getRoateVY() * 0.6);
 		}	
 	}
-    
-    d3Graphs.initGraphs();
+	console.log(spec);
+    d3Graphs.initGraphs(spec);
+}
+
+function findCode(spec, countryName){
+	countryName = countryName.toUpperCase();
+	for( var i in spec.countryLookup ){
+		if( spec.countryLookup[i] === countryName )
+			return i;
+	}
+	return 'not found';
+}
+
+//	ordered lookup list for country color index
+//	used for GLSL to find which country needs to be highlighted
+var countryColorMap = {'PE':1,
+	'BF':2,'FR':3,'LY':4,'BY':5,'PK':6,'ID':7,'YE':8,'MG':9,'BO':10,'CI':11,'DZ':12,'CH':13,'CM':14,'MK':15,'BW':16,'UA':17,
+	'KE':18,'TW':19,'JO':20,'MX':21,'AE':22,'BZ':23,'BR':24,'SL':25,'ML':26,'CD':27,'IT':28,'SO':29,'AF':30,'BD':31,'DO':32,'GW':33,
+	'GH':34,'AT':35,'SE':36,'TR':37,'UG':38,'MZ':39,'JP':40,'NZ':41,'CU':42,'VE':43,'PT':44,'CO':45,'MR':46,'AO':47,'DE':48,'SD':49,
+	'TH':50,'AU':51,'PG':52,'IQ':53,'HR':54,'GL':55,'NE':56,'DK':57,'LV':58,'RO':59,'ZM':60,'IR':61,'MM':62,'ET':63,'GT':64,'SR':65,
+	'EH':66,'CZ':67,'TD':68,'AL':69,'FI':70,'SY':71,'KG':72,'SB':73,'OM':74,'PA':75,'AR':76,'GB':77,'CR':78,'PY':79,'GN':80,'IE':81,
+	'NG':82,'TN':83,'PL':84,'NA':85,'ZA':86,'EG':87,'TZ':88,'GE':89,'SA':90,'VN':91,'RU':92,'HT':93,'BA':94,'IN':95,'CN':96,'CA':97,
+	'SV':98,'GY':99,'BE':100,'GQ':101,'LS':102,'BG':103,'BI':104,'DJ':105,'AZ':106,'MY':107,'PH':108,'UY':109,'CG':110,'RS':111,'ME':112,'EE':113,
+	'RW':114,'AM':115,'SN':116,'TG':117,'ES':118,'GA':119,'HU':120,'MW':121,'TJ':122,'KH':123,'KR':124,'HN':125,'IS':126,'NI':127,'CL':128,'MA':129,
+	'LR':130,'NL':131,'CF':132,'SK':133,'LT':134,'ZW':135,'LK':136,'IL':137,'LA':138,'KP':139,'GR':140,'TM':141,'EC':142,'BJ':143,'SI':144,'NO':145,
+	'MD':146,'LB':147,'NP':148,'ER':149,'US':150,'KZ':151,'AQ':152,'SZ':153,'UZ':154,'MN':155,'BT':156,'NC':157,'FJ':158,'KW':159,'TL':160,'BS':161,
+	'VU':162,'FK':163,'GM':164,'QA':165,'JM':166,'CY':167,'PR':168,'PS':169,'BN':170,'TT':171,'CV':172,'PF':173,'WS':174,'LU':175,'KM':176,'MU':177,
+	'FO':178,'ST':179,'AN':180,'DM':181,'TO':182,'KI':183,'FM':184,'BH':185,'AD':186,'MP':187,'PW':188,'SC':189,'AG':190,'BB':191,'TC':192,'VC':193,
+	'LC':194,'YT':195,'VI':196,'GD':197,'MT':198,'MV':199,'KY':200,'KN':201,'MS':202,'BL':203,'NU':204,'PM':205,'CK':206,'WF':207,'AS':208,'MH':209,
+	'AW':210,'LI':211,'VG':212,'SH':213,'JE':214,'AI':215,'MF_1_':216,'GG':217,'SM':218,'BM':219,'TV':220,'NR':221,'GI':222,'PN':223,'MC':224,'VA':225,
+	'IM':226,'GU':227,'SG':228};
+
+function highlightCountry(spec, countries ){
+	var countryCodes = [];
+	for( var i in countries ){
+		var code = findCode(spec, countries[i]);
+		countryCodes.push(code);
+	}
+
+	var ctx = spec.lookup.canvas.getContext('2d');
+	ctx.clearRect(0,0,256,1);
+
+	var pickMask = countries.length === 0 ? 0 : 1;
+	var oceanFill = 10 * pickMask;
+	ctx.fillStyle = 'rgb(' + oceanFill + ',' + oceanFill + ',' + oceanFill +')';
+	ctx.fillRect( 0, 0, 1, 1 );
+
+	var selectedCountryCode = spec.selectedCountry.countryCode;
+
+	for( var i in countryCodes ){
+		var countryCode = countryCodes[i];
+		var colorIndex = countryColorMap[ countryCode ];
+
+		var mapColor = spec.countryData[countries[i]].mapColor;
+		// var fillCSS = '#ff0000';
+		var fillCSS = '#333333';
+		if( countryCode === selectedCountryCode )
+			fillCSS = '#eeeeee';
+
+		ctx.fillStyle = fillCSS;
+		ctx.fillRect( colorIndex, 0, 1, 1 );
+	}
+
+	spec.lookup.texture.needsUpdate = true;
+}
+
+function getHistoricalData( spec ){
+	var history = [];
+
+	var countryName = spec.selectedCountry.countryName;
+
+	var exportCategories = spec.selectionData.getExportCategories();
+	var importCategories = spec.selectionData.getImportCategories();
+
+	for( var i in spec.timeBins ){
+		var yearBin = spec.timeBins[i].data;
+		var value = { imports: 0, exports:0 };
+		for( var s in yearBin ){
+			var set = yearBin[s];
+			var categoryName = spec.reverseWeaponLookup[set.wc];
+
+			var exporterCountryName = set.e.toUpperCase();
+			var importerCountryName = set.i.toUpperCase();
+			var relevantCategory = ( countryName === exporterCountryName && $.inArray(categoryName, exportCategories ) >= 0 ) ||
+				( countryName === importerCountryName && $.inArray(categoryName, importCategories ) >= 0 );
+
+			if( relevantCategory === false )
+				continue;
+
+			//	ignore all unidentified country data
+			if( spec.countryData[exporterCountryName] === undefined || spec.countryData[importerCountryName] === undefined )
+				continue;
+
+			if( exporterCountryName === countryName )
+				value.exports += set.v;
+			if( importerCountryName === countryName )
+				value.imports += set.v;
+		}
+		history.push(value);
+	}
+	// console.log(history);
+	return history;
 }
