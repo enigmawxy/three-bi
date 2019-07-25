@@ -147,7 +147,7 @@ function makeConnectionLineGeometry( exporter, importer, value, type ){
 	return curveGeometry;
 }
 
-function constrain(v, min, max){
+export function constrain(v, min, max){
 	if( v < min )
 		v = min;
 	else

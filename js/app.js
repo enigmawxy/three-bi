@@ -125,7 +125,6 @@ export function initScene() {
 
     spec.rotating = rotating;
     spec.visualizationMesh = visualizationMesh;
-    spec.camera = camera;
 
     // buildGUI(); 忽略
     selectVisualization('2010', ['UNITED STATES'], ['Military Weapons','Civilian Weapons', 'Ammunition'], ['Military Weapons','Civilian Weapons', 'Ammunition'] );
@@ -169,6 +168,7 @@ export function initScene() {
     camera.position.y = 0;
     camera.lookAt(scene.width/2, scene.height/2);
     scene.add( camera );
+    spec.camera = camera;
 
     var windowResize;
     windowResize = THREEx.WindowResize(renderer, camera);
@@ -216,18 +216,18 @@ export function animate() {
     rotating.rotation.x = coords.rotate.x;
     rotating.rotation.y = coords.rotate.y;
 
-    // render();
+    render();
 
-    // requestAnimationFrame( animate );
+    requestAnimationFrame( animate );
 
 
-    // SceneUtils.traverseHierarchy( rotating,
-    //     function(mesh) {
-    //         if (mesh.update !== undefined) {
-    //             mesh.update();
-    //         }
-    //     }
-    // );
+    THREE.SceneUtils.traverseHierarchy( rotating,
+        function(mesh) {
+            if (mesh.update !== undefined) {
+                mesh.update();
+            }
+        }
+    );
 
     for( var i in markers ){
         var marker = markers[i];

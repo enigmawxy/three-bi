@@ -73,7 +73,7 @@ function getAbsOrigin( object3D ){
 
 export function screenXY(vec3){
 	var projector = new THREE.Projector();
-	var vector = projector.projectVector( vec3.clone(), dataObject.camera );
+    var vector = projector.projectVector( vec3.clone(), dataObject.camera );
 	var result = {};
     var windowWidth = window.innerWidth;
     var minWidth = 1280;

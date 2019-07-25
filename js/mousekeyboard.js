@@ -1,6 +1,8 @@
 import {THREEx} from "../lib/three/THREEx.KeyboardState";
 import {dataObject} from './main';
 import {countryColorMap, selectVisualization} from './visualize'
+import {d3Graphs} from '../lib/ui.controls';
+import {getPickColor} from './app'
 
 export var coords = {
 	rotate:  {x: 0, y:0},

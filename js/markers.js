@@ -1,5 +1,6 @@
 import {numberWithCommas, screenXY} from './util'
 import {dataObject as spec} from './main';
+import {constrain} from "./visualize";
 
 export var markers = [];
 
@@ -70,7 +71,7 @@ export function attachMarkerToCountry( countryName, importance ){
 		var abspos = matrix.multiplyVector3( country.center.clone() );
 		var screenPos = screenXY(abspos);			
 
-		var s = 0.3 + camera.scale.z * 1;
+		var s = 0.3 + spec.camera.scale.z * 1;
 		var importanceScale = this.importance / 5000000;
 		importanceScale = constrain( importanceScale, 0, 18 );
 		s += importanceScale;
