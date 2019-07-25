@@ -1,6 +1,7 @@
 import {numberWithCommas, screenXY} from './util'
 import {dataObject as spec} from './main';
 import {constrain} from "./visualize";
+import {selectVisualization} from './visualize';
 
 export var markers = [];
 
@@ -136,7 +137,7 @@ export function attachMarkerToCountry( countryName, importance ){
 	}
 
 	var markerSelect = function(e){
-		var selection = selectionData;
+		var selection = spec.selectionData;
 		selectVisualization(selection.selectedYear, [this.countryName], selection.getExportCategories(), selection.getImportCategories() );
 	};
 	marker.addEventListener('click', markerSelect, true);

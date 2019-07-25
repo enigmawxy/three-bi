@@ -1,4 +1,4 @@
-import {THREEx} from "../lib/three/THREEx.KeyboardState";
+import KeyboardState from "../lib/three/THREEx.kbs";
 import {dataObject} from './main';
 import {countryColorMap, selectVisualization} from './visualize'
 import {d3Graphs} from '../lib/ui.controls';
@@ -9,13 +9,12 @@ export var coords = {
 	rotateT: {x: undefined, y: undefined},
 	rotateV: {x:0, y:0},
 	dragging: false,
-	mouse: {x: 0, y: 0},
-	camera: undefined
+	mouse: {x: 0, y: 0}
 };
 
 var pmouseX = 0, pmouseY = 0;
 var pressX = 0, pressY = 0;
-var keyboard = THREEx.KeyboardState();
+var keyboard = new KeyboardState();
 
 export function onDocumentMouseMove( event ) {
 
@@ -84,8 +83,8 @@ export function onKeyDown( event ){
 }
 
 function handleMWheel( delta ) {
-	coords.camera.scale.z += delta * 0.1;
-	coords.camera.scale.z = constrain( coords.camera.scale.z, 0.7, 5.0 );
+	dataObject.camera.scale.z += delta * 0.1;
+	dataObject.camera.scale.z = constrain( dataObject.camera.scale.z, 0.7, 5.0 );
 }
 
 export function onMouseWheel( event ){
