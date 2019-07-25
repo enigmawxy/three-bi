@@ -1,3 +1,4 @@
+import {dataObject as spec} from './main';
 import {
 	Vector3, CubicBezierCurve3, Geometry, Color, GeometryUtils, Line,
 	AdditiveBlending, ShaderMaterial, LineBasicMaterial, TextureLoader,
@@ -12,7 +13,7 @@ import {d3Graphs} from '../lib/ui.controls';
 var globeRadius = 1000;
 var vec3_origin = new Vector3(0,0,0);
 
-export function buildDataVizGeometries( spec ){
+export function buildDataVizGeometries(){
 	var selectableYears =[];
 	var loadLayer = document.getElementById('loading');
 
@@ -155,7 +156,7 @@ function constrain(v, min, max){
 	return v;
 }
 
-export function getVisualizedMesh( spec, year, countries, exportCategories, importCategories ){
+export function getVisualizedMesh(year, countries, exportCategories, importCategories ){
 	//	for comparison purposes, all caps the country names
 	for( var i in countries ){
 		countries[i] = countries[i].toUpperCase();
@@ -385,7 +386,7 @@ export function getVisualizedMesh( spec, year, countries, exportCategories, impo
 	return splineOutline;	
 }
 
-export function selectVisualization( spec, rotating, visualizationMesh, year, countries, exportCategories, importCategories ){
+export function selectVisualization( year, countries, exportCategories, importCategories ){
 	//	we're only doing one country for now so...
 	var cName = countries[0].toUpperCase();
 	
@@ -424,18 +425,18 @@ export function selectVisualization( spec, rotating, visualizationMesh, year, co
 	}
 
 	//	clear children
-	while( visualizationMesh.children.length > 0 ){
-		var c = visualizationMesh.children[0];
-		visualizationMesh.remove(c);
+	while( spec.visualizationMesh.children.length > 0 ){
+		var c = spec.visualizationMesh.children[0];
+		spec.visualizationMesh.remove(c);
 	}
 
 	//	build the mesh
 	console.time('getVisualizedMesh');
-	var mesh = getVisualizedMesh(spec, year, countries, exportCategories, importCategories );
+	var mesh = getVisualizedMesh( year, countries, exportCategories, importCategories );
 	console.timeEnd('getVisualizedMesh');
 
 	//	add it to scene graph
-	visualizationMesh.add( mesh );	
+	spec.visualizationMesh.add( mesh );
 
 
 	//	alright we got no data but at least highlight the country we've selected
@@ -461,10 +462,10 @@ export function selectVisualization( spec, rotating, visualizationMesh, year, co
 			while(true) {
                 var targetY0Neg = targetY0 - Math.PI * 2 * piCounter;
                 var targetY0Pos = targetY0 + Math.PI * 2 * piCounter;
-                if(Math.abs(targetY0Neg - rotating.rotation.y) < Math.PI) {
+                if(Math.abs(targetY0Neg - spec.rotating.rotation.y) < Math.PI) {
                     rotateTargetY = targetY0Neg;
                     break;
-                } else if(Math.abs(targetY0Pos - rotating.rotation.y) < Math.PI) {
+                } else if(Math.abs(targetY0Pos - spec.rotating.rotation.y) < Math.PI) {
 					coords.rotateT.y = targetY0Pos;
                     break;
                 }

@@ -1,6 +1,6 @@
 import {THREEx} from "../lib/three/THREEx.KeyboardState";
 import {dataObject} from './main';
-import {countryColorMap} from './visualize'
+import {countryColorMap, selectVisualization} from './visualize'
 
 export var coords = {
 	rotate:  {x: 0, y:0},
@@ -49,7 +49,7 @@ export function onDocumentMouseDown( event ) {
 export function onDocumentMouseUp( event ){
 	d3Graphs.zoomBtnMouseup();
 	coords.dragging = false;
-	histogramPressed = false;
+	var histogramPressed = false; // it seems no use
 }
 
 export function onClick( event ){
@@ -66,12 +66,12 @@ export function onClick( event ){
 			var countryName = dataObject.countryLookup[countryCode];
 			if( countryName === undefined )
 				return;			
-			if( $.inArray(countryName, selectableCountries) <= -1 )
+			if( $.inArray(countryName, dataObject.selectableCountries) <= -1 )
 				return;
 
-			var selection = selectionData;
+			var selection = dataObject.selectionData;
 			selection.selectedCountry = countryName;
-			selectVisualization( timeBins, selection.selectedYear, [selection.selectedCountry], selection.getExportCategories(), selection.getImportCategories() );	
+			selectVisualization(selection.selectedYear, [selection.selectedCountry], selection.getExportCategories(), selection.getImportCategories() );
 
 			return;
 		}
@@ -81,12 +81,12 @@ export function onClick( event ){
 export function onKeyDown( event ){
 }
 
-export function handleMWheel( delta ) {
+function handleMWheel( delta ) {
 	coords.camera.scale.z += delta * 0.1;
 	coords.camera.scale.z = constrain( coords.camera.scale.z, 0.7, 5.0 );
 }
 
-function onMouseWheel( event ){
+export function onMouseWheel( event ){
 	var delta = 0;
 
 	if (event.wheelDelta) { /* IE/Opera. */

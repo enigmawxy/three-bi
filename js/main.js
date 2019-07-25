@@ -75,7 +75,7 @@ function start() {
                             dataObject['outlineImage'] = mapOutlineImage;
                             dataObject['selectableCountries'] =[];
                             dataObject['countryData'] = {};
-                            initScene(dataObject);
+                            initScene();
                             animate();
                         })
                     })

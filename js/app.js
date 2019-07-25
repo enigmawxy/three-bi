@@ -1,3 +1,4 @@
+import {dataObject as spec} from './main';
 import {Scene, AmbientLight, SpotLight, PointLight, Object3D, WebGLRenderer,
         Texture, NearestFilter, ShaderMaterial, Mesh, SphereGeometry, PerspectiveCamera
         } from '../lib/three/three.module'
@@ -22,7 +23,7 @@ var controllers = {
     transitionTime: 2000,
 };
 
-export function initScene(spec) {
+export function initScene() {
     scene = new Scene();
     scene.matrixAutoUpdate = false;
 
@@ -111,14 +112,17 @@ export function initScene(spec) {
     console.timeEnd('loadGeoData');
 
     console.time('buildDataVizGeometries');
-    var vizilines = buildDataVizGeometries(spec);
+    var vizilines = buildDataVizGeometries();
     console.timeEnd('buildDataVizGeometries');
 
     var visualizationMesh = new Object3D();
     rotating.add(visualizationMesh);
 
+    spec.rotating = rotating;
+    spec.visualizationMesh = visualizationMesh;
+
     // buildGUI(); 忽略
-    selectVisualization( spec, rotating, visualizationMesh,'2010', ['UNITED STATES'], ['Military Weapons','Civilian Weapons', 'Ammunition'], ['Military Weapons','Civilian Weapons', 'Ammunition'] );
+    selectVisualization( /*spec, rotating, visualizationMesh,*/'2010', ['UNITED STATES'], ['Military Weapons','Civilian Weapons', 'Ammunition'], ['Military Weapons','Civilian Weapons', 'Ammunition'] );
 
     //	-----------------------------------------------------------------------------
     //	Setup our renderer
