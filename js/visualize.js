@@ -1,17 +1,17 @@
 import {dataObject as spec} from './main';
-import {
-	Vector3, CubicBezierCurve3, Geometry, Color, GeometryUtils, Line,
-	AdditiveBlending, ShaderMaterial, LineBasicMaterial, TextureLoader,
-	NormalBlending, PointsMaterial, Points
-} from "../lib/three/three.module";
-
+// import {
+// 	Vector3, CubicBezierCurve3, Geometry, Color, GeometryUtils, Line,
+// 	AdditiveBlending, ShaderMaterial, LineBasicMaterial, TextureLoader,
+// 	NormalBlending, PointsMaterial, Points
+// } from "../lib/three/three.module";
+import {THREE} from '../lib/three/Three'
 import {createUtilLineGeometry} from './util';
 import {removeMarkerFromCountry, attachMarkerToCountry} from  './markers'
 import {coords} from './mousekeyboard';
 import {d3Graphs} from '../lib/ui.controls';
 
 var globeRadius = 1000;
-var vec3_origin = new Vector3(0,0,0);
+var vec3_origin = new THREE.Vector3(0,0,0);
 
 export function buildDataVizGeometries(){
 	var selectableYears =[];
@@ -78,7 +78,7 @@ function makeConnectionLineGeometry( exporter, importer, value, type ){
 
 	//	the normal from start to end
 	// var normal = (new Vector3()).sub(start,end);
-	var normal = (new Vector3()).subVectors(start,end);
+	var normal = (new THREE.Vector3()).sub(start,end);
 	normal.normalize();
 
 	/*
@@ -112,10 +112,10 @@ function makeConnectionLineGeometry( exporter, importer, value, type ){
 	var endAnchor = end;
 
 	//	now make a bezier curve out of the above like so in the diagram
-	var splineCurveA = new CubicBezierCurve3( start, startAnchor, midStartAnchor, mid);
+	var splineCurveA = new THREE.CubicBezierCurve3( start, startAnchor, midStartAnchor, mid);
 	// splineCurveA.updateArcLengths();
 
-	var splineCurveB = new CubicBezierCurve3( mid, midEndAnchor, endAnchor, end);
+	var splineCurveB = new THREE.CubicBezierCurve3( mid, midEndAnchor, endAnchor, end);
 	// splineCurveB.updateArcLengths();
 
 	//	how many vertices do we want on this guy? this is for *each* side
@@ -171,10 +171,10 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 
 	var bin = spec.timeBins[indexFromYear].data;
 
-	var linesGeo = new Geometry();
+	var linesGeo = new THREE.Geometry();
 	var lineColors = [];
 
-	var particlesGeo = new Geometry();
+	var particlesGeo = new THREE.Geometry();
 	var particleColors = [];
 
 	//	go through the data from year, and find all relevant geometries
@@ -206,7 +206,7 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 			}
 
 			// var lineColor = thisLineIsExport ? new Color(exportColor) : new Color(importColor);
-			var lineColor = thisLineIsExport ? new Color(0xdd380c) : new Color(0x154492);
+			var lineColor = thisLineIsExport ? new THREE.Color(0xdd380c) : new THREE.Color(0x154492);
 
 			var lastColor;
 			//	grab the colors from the vertices
@@ -217,7 +217,7 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 			}
 
 			//	merge it all together
-			GeometryUtils.merge( linesGeo, set.lineGeometry );
+			THREE.GeometryUtils.merge( linesGeo, set.lineGeometry );
 			// Geometry.merge( linesGeo, set.lineGeometry );
 
 			var particleColor = lastColor.clone();		
@@ -290,9 +290,9 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 	linesGeo.colors = lineColors;	
 
 	//	make a final mesh out of this composite
-	var splineOutline = new Line( linesGeo, new LineBasicMaterial(
-		{ 	color: 0xffffff, opacity: 1.0, blending: 
-			AdditiveBlending, transparent:true,
+	var splineOutline = new THREE.Line( linesGeo, new THREE.LineBasicMaterial(
+		{ 	color: 0xffffff, opacity: 1.0, blending:
+			THREE.AdditiveBlending, transparent:true,
 			depthWrite: false, vertexColors: true, 
 			linewidth: 1 } ) 
 	);
@@ -307,18 +307,18 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 
 	var uniforms = {
 		amplitude: { type: "f", value: 1.0 },
-		color:     { type: "c", value: new Color( 0xffffff ) },
-		texture:   { type: "t", value: 0, texture: new TextureLoader().load("images/particleA.png" ) },
+		color:     { type: "c", value: new THREE.Color( 0xffffff ) },
+		texture:   { type: "t", value: 0, texture: new THREE.ImageUtils.loadTexture("images/particleA.png" ) },
 	};
 
-	var shaderMaterial = new ShaderMaterial( {
+	var shaderMaterial = new THREE.ShaderMaterial( {
 
 		uniforms: 		uniforms,
-		// attributes:     attributes, // No such attributes in current three version
+		attributes:     attributes, // No such attributes in current three version
 		vertexShader:   document.getElementById( 'vertexshader' ).textContent,
 		fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
 
-		blending: 		AdditiveBlending,
+		blending: 		THREE.AdditiveBlending,
 		depthTest: 		true,
 		depthWrite: 	false,
 		transparent:	true,
@@ -327,18 +327,18 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 
 
 
-	var particleGraphic = new TextureLoader().load("images/map_mask.png");
-	// var particleMat = new ParticleBasicMaterial( { map: particleGraphic, color: 0xffffff, size: 60,
+	var particleGraphic = new THREE.ImageUtils.loadTexture("images/map_mask.png");
+	var particleMat = new THREE.ParticleBasicMaterial( { map: particleGraphic, color: 0xffffff, size: 60,
+														blending: THREE.NormalBlending, transparent:true,
+														depthWrite: false, vertexColors: true,
+														sizeAttenuation: true } );
+	// var particleMat = new PointsMaterial( { map: particleGraphic, color: 0xffffff, size: 60,
 	// 													blending: NormalBlending, transparent:true,
 	// 													depthWrite: false, vertexColors: true,
 	// 													sizeAttenuation: true } );
-	var particleMat = new PointsMaterial( { map: particleGraphic, color: 0xffffff, size: 60,
-														blending: NormalBlending, transparent:true,
-														depthWrite: false, vertexColors: true,
-														sizeAttenuation: true } );
 	particlesGeo.colors = particleColors;
-	// var pSystem = new ParticleSystem( particlesGeo, shaderMaterial );
-	var pSystem = new Points( particlesGeo, shaderMaterial );
+	var pSystem = new THREE.ParticleSystem( particlesGeo, shaderMaterial );
+	// var pSystem = new Points( particlesGeo, shaderMaterial );
 	pSystem.dynamic = true;
 	splineOutline.add( pSystem );
 
@@ -444,14 +444,14 @@ export function selectVisualization( year, countries, exportCategories, importCa
 		mesh.affectedCountries.push( cName );
 	}	
 
-	for( var i in mesh.affectedCountries ){
+	for( var i in mesh.affectedCountries ) {
 		var countryName = mesh.affectedCountries[i];
 		var country = spec.countryData[countryName];
-		attachMarkerToCountry( spec, countryName, country.mapColor );
+		attachMarkerToCountry(countryName, country.mapColor);
 	}
 
 	// console.log( mesh.affectedCountries );
-	highlightCountry( spec, mesh.affectedCountries );
+	highlightCountry(mesh.affectedCountries );
 
 	if( spec.previouslySelectedCountry !== spec.selectedCountry ){
 		if( spec.selectedCountry ){
@@ -483,7 +483,7 @@ export function selectVisualization( year, countries, exportCategories, importCa
     d3Graphs.initGraphs(spec);
 }
 
-function findCode(spec, countryName){
+function findCode(countryName){
 	countryName = countryName.toUpperCase();
 	for( var i in spec.countryLookup ){
 		if( spec.countryLookup[i] === countryName )
@@ -511,10 +511,10 @@ export var countryColorMap = {'PE':1,
 	'AW':210,'LI':211,'VG':212,'SH':213,'JE':214,'AI':215,'MF_1_':216,'GG':217,'SM':218,'BM':219,'TV':220,'NR':221,'GI':222,'PN':223,'MC':224,'VA':225,
 	'IM':226,'GU':227,'SG':228};
 
-function highlightCountry(spec, countries ){
+export function highlightCountry(countries ){
 	var countryCodes = [];
 	for( var i in countries ){
-		var code = findCode(spec, countries[i]);
+		var code = findCode(countries[i]);
 		countryCodes.push(code);
 	}
 

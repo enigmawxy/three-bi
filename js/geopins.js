@@ -1,5 +1,5 @@
-import {Vector3} from '../lib/three/three.module'
-
+// import {Vector3} from '../lib/three/three.module'
+import {THREE} from '../lib/three/Three'
 export function loadGeoData(spec){
     //	-----------------------------------------------------------------------------
     //	Load the world geo data json, per country	
@@ -30,7 +30,7 @@ export function loadGeoData(spec){
         var phi = Math.PI/2 - lat * Math.PI / 180 - Math.PI * 0.01;
         var theta = 2 * Math.PI - lon * Math.PI / 180 + Math.PI * 0.06;
 		
-		var center = new Vector3();
+		var center = new THREE.Vector3();
         center.x = Math.sin(phi) * Math.cos(theta) * rad;
         center.y = Math.cos(phi) * rad;
         center.z = Math.sin(phi) * Math.sin(theta) * rad;  	

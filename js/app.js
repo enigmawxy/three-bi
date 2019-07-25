@@ -1,14 +1,17 @@
 import {dataObject as spec} from './main';
-import {Scene, AmbientLight, SpotLight, PointLight, Object3D, WebGLRenderer,
-        Texture, NearestFilter, ShaderMaterial, Mesh, SphereGeometry, PerspectiveCamera
-        } from '../lib/three/three.module'
+// import {Scene, AmbientLight, SpotLight, PointLight, Object3D, WebGLRenderer, SceneUtils,
+//         Texture, NearestFilter, ShaderMaterial, Mesh, SphereGeometry, PerspectiveCamera
+//         } from '../lib/three/three.module'
+import {THREE} from '../lib/three/Three'
 import {loadGeoData} from './geopins';
 import '../lib/jquery-1.7.1.min'
 import {buildDataVizGeometries, selectVisualization} from './visualize';
-
+import {TWEEN} from "../lib/Tween";
 import {THREEx} from "../lib/three/THREEx.WindowResize";
 import {onDocumentMouseMove, onDocumentResize, onDocumentMouseDown,
         onDocumentMouseUp, onMouseWheel, onClick, onKeyDown, coords} from './mousekeyboard';
+import {highlightCountry} from './visualize';
+import {markers} from './markers';
 
 var camera, scene, renderer, controls, rotating;
 //	where in html to hold all our things
@@ -24,25 +27,25 @@ var controllers = {
 };
 
 export function initScene() {
-    scene = new Scene();
+    scene = new THREE.Scene();
     scene.matrixAutoUpdate = false;
 
-    scene.add(new AmbientLight(0x505050));
+    scene.add(new THREE.AmbientLight(0x505050));
 
-    var light1 = new SpotLight(0xeeeeee, 3);
+    var light1 = new THREE.SpotLight(0xeeeeee, 3);
     light1.position.x = 730;
     light1.position.y = 520;
     light1.position.z = 626;
     light1.castShadow = true;
     scene.add(light1);
 
-    var light2 = new PointLight(0x222222, 14.8);
+    var light2 = new THREE.PointLight(0x222222, 14.8);
     light2.position.x = -640;
     light2.position.y = -500;
     light2.position.z = -1000;
     scene.add(light2);
 
-    rotating = new Object3D();
+    rotating = new THREE.Object3D();
     scene.add(rotating);
 
     var lookupCanvas = document.createElement('canvas');
@@ -50,18 +53,18 @@ export function initScene() {
     lookupCanvas.height = 1;
     spec.lookup.canvas = lookupCanvas;
 
-    var lookupTexture = new Texture(lookupCanvas);
-    lookupTexture.magFilter = NearestFilter;
-    lookupTexture.minFilter = NearestFilter;
+    var lookupTexture = new THREE.Texture(lookupCanvas);
+    lookupTexture.magFilter = THREE.NearestFilter;
+    lookupTexture.minFilter = THREE.NearestFilter;
     lookupTexture.needsUpdate = true;
     spec.lookup.texture = lookupTexture;
 
-    var indexedMapTexture = new Texture(spec.indexImage);
+    var indexedMapTexture = new THREE.Texture(spec.indexImage);
     indexedMapTexture.needsUpdate = true;
-    indexedMapTexture.magFilter = NearestFilter;
-    indexedMapTexture.minFilter = NearestFilter;
+    indexedMapTexture.magFilter = THREE.NearestFilter;
+    indexedMapTexture.minFilter = THREE.NearestFilter;
 
-    var outlinedMapTexture = new Texture(spec.outlineImage);
+    var outlinedMapTexture = new THREE.Texture(spec.outlineImage);
     outlinedMapTexture.needsUpdate = true;
 
     var uniforms = {
@@ -71,14 +74,16 @@ export function initScene() {
         'outlineLevel': {type: 'f', value: 1},
     };
 
-    var mapUniforms = uniforms;
-    var shaderMaterial = new ShaderMaterial({
+
+    spec.mapUniforms = uniforms;
+
+    var shaderMaterial = new THREE.ShaderMaterial({
         uniforms: uniforms,
         vertexShader: document.getElementById('globeVertexShader').textContent,
         fragmentShader: document.getElementById('globeFragmentShader').textContent,
     });
 
-    var sphere = new Mesh(new SphereGeometry(100, 40, 40), shaderMaterial);
+    var sphere = new THREE.Mesh(new THREE.SphereGeometry(100, 40, 40), shaderMaterial);
 
     sphere.doubleSided = false;
 
@@ -115,18 +120,19 @@ export function initScene() {
     var vizilines = buildDataVizGeometries();
     console.timeEnd('buildDataVizGeometries');
 
-    var visualizationMesh = new Object3D();
+    var visualizationMesh = new THREE.Object3D();
     rotating.add(visualizationMesh);
 
     spec.rotating = rotating;
     spec.visualizationMesh = visualizationMesh;
+    spec.camera = camera;
 
     // buildGUI(); 忽略
-    selectVisualization( /*spec, rotating, visualizationMesh,*/'2010', ['UNITED STATES'], ['Military Weapons','Civilian Weapons', 'Ammunition'], ['Military Weapons','Civilian Weapons', 'Ammunition'] );
+    selectVisualization('2010', ['UNITED STATES'], ['Military Weapons','Civilian Weapons', 'Ammunition'], ['Military Weapons','Civilian Weapons', 'Ammunition'] );
 
     //	-----------------------------------------------------------------------------
     //	Setup our renderer
-    renderer = new WebGLRenderer({antialias:false});
+    renderer = new THREE.WebGLRenderer({antialias:false});
     renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.autoClear = false;
 
@@ -158,7 +164,7 @@ export function initScene() {
 
     //	-----------------------------------------------------------------------------
     //	Setup our camera
-    camera = new PerspectiveCamera( 12, window.innerWidth / window.innerHeight, 1, 20000 );
+    camera = new THREE.PerspectiveCamera( 12, window.innerWidth / window.innerHeight, 1, 20000 );
     camera.position.z = 1400;
     camera.position.y = 0;
     camera.lookAt(scene.width/2, scene.height/2);
@@ -169,6 +175,115 @@ export function initScene() {
 }
 
 export function animate() {
-    coords.rotate.x = 2;
-    console.log(coords);
+    if( coords.rotateT.x !== undefined && coords.rotateT.y !== undefined ){
+
+        coords.rotateV.x += (coords.rotateT.x - coords.rotate.x) * 0.012;
+        coords.rotateV.y += (coords.rotateT.y - coords.rotate.y) * 0.012;
+
+        if( Math.abs(coords.rotateT.x - coords.rotate.x) < 0.1 && Math.abs(coords.rotateT.y - coords.rotate.y) < 0.1 ){
+            coords.rotateT.x = undefined;
+            coords.rotateT.y = undefined;
+        }
+    }
+
+    coords.rotate.x += coords.rotateV.x;
+    coords.rotate.y += coords.rotateV.y;
+
+    coords.rotateV.x *= 0.98;
+    coords.rotateV.y *= 0.98;
+
+    if(coords.dragging || coords.rotateT.x !== undefined ){
+        coords.rotateV.x *= 0.6;
+        coords.rotateV.y *= 0.6;
+    }
+
+    coords.rotate.y += controllers.spin * 0.01;
+
+    //	constrain the pivot up/down to the poles
+    //	force a bit of bounce back action when hitting the poles
+    var rotateXMax = 90 * Math.PI/180;
+    if(coords.rotate.x < -rotateXMax){
+        coords.rotate.x = -rotateXMax;
+        coords.rotateV.x *= -0.95;
+    }
+    if(coords.rotate.x > rotateXMax){
+        coords.rotate.x = rotateXMax;
+        coords.rotateV.x *= -0.95;
+    }
+
+    TWEEN.update();
+
+    rotating.rotation.x = coords.rotate.x;
+    rotating.rotation.y = coords.rotate.y;
+
+    // render();
+
+    // requestAnimationFrame( animate );
+
+
+    // SceneUtils.traverseHierarchy( rotating,
+    //     function(mesh) {
+    //         if (mesh.update !== undefined) {
+    //             mesh.update();
+    //         }
+    //     }
+    // );
+
+    for( var i in markers ){
+        var marker = markers[i];
+        marker.update();
+    }
+}
+
+function render() {
+    renderer.clear();
+    renderer.render( scene, camera );
+}
+
+export function getPickColor(){
+    var affectedCountries = undefined;
+    if( spec.visualizationMesh.children[0] !== undefined )
+        affectedCountries = spec.visualizationMesh.children[0].affectedCountries;
+
+    highlightCountry([]);
+    rotating.remove(spec.visualizationMesh);
+    spec.mapUniforms['outlineLevel'].value = 0;
+    spec.lookup.texture.needsUpdate = true;
+
+    renderer.autoClear = false;
+    renderer.autoClearColor = false;
+    renderer.autoClearDepth = false;
+    renderer.autoClearStencil = false;
+    renderer.preserve
+
+    renderer.clear();
+    renderer.render(scene,camera);
+
+    var gl = renderer.context;
+    gl.preserveDrawingBuffer = true;
+
+    var mx = ( coords.mouse.x + renderer.context.canvas.width/2 );//(mouseX + renderer.context.canvas.width/2) * 0.25;
+    var my = ( -coords.mouse.y + renderer.context.canvas.height/2 );//(-mouseY + renderer.context.canvas.height/2) * 0.25;
+    mx = Math.floor( mx );
+    my = Math.floor( my );
+
+    var buf = new Uint8Array( 4 );
+    // console.log(buf);
+    gl.readPixels( mx, my, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, buf );
+    // console.log(buf);
+
+    renderer.autoClear = true;
+    renderer.autoClearColor = true;
+    renderer.autoClearDepth = true;
+    renderer.autoClearStencil = true;
+
+    gl.preserveDrawingBuffer = false;
+
+    spec.mapUniforms['outlineLevel'].value = 1;
+    rotating.add(spec.visualizationMesh);
+
+    if( affectedCountries !== undefined ){
+        highlightCountry(affectedCountries);
+    }
+    return buf[0];
 }

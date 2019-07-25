@@ -7,30 +7,31 @@ export var coords = {
 	rotateT: {x: undefined, y: undefined},
 	rotateV: {x:0, y:0},
 	dragging: false,
+	mouse: {x: 0, y: 0},
 	camera: undefined
 };
 
-var mouseX = 0, mouseY = 0, pmouseX = 0, pmouseY = 0;
+var pmouseX = 0, pmouseY = 0;
 var pressX = 0, pressY = 0;
 
 var keyboard = THREEx.KeyboardState();
 
 export function onDocumentMouseMove( event ) {
 
-	pmouseX = mouseX;
-	pmouseY = mouseY;
+	pmouseX = coords.mouse.x;
+	pmouseY = coords.mouse.y;
 
-	mouseX = event.clientX - window.innerWidth * 0.5;
-	mouseY = event.clientY - window.innerHeight * 0.5;
+	coords.mouse.x = event.clientX - window.innerWidth * 0.5;
+	coords.mouse.y = event.clientY - window.innerHeight * 0.5;
 
 	if(coords.dragging){
 		if(keyboard.pressed("shift") === false){
-			coords.rotateV.y += (mouseX - pmouseX) / 2 * Math.PI / 180 * 0.3;
-  			coords.rotateV.x += (mouseY - pmouseY) / 2 * Math.PI / 180 * 0.3;	
+			coords.rotateV.y += (coords.mouse.x - pmouseX) / 2 * Math.PI / 180 * 0.3;
+  			coords.rotateV.x += (coords.mouse.y - pmouseY) / 2 * Math.PI / 180 * 0.3;
   		}
   		else{
-  			coords.camera.position.x -= (mouseX - pmouseX) * .5;
-  			coords.camera.position.y += (mouseY - pmouseY) * .5;
+  			coords.camera.position.x -= (coords.mouse.x - pmouseX) * .5;
+  			coords.camera.position.y += (coords.mouse.y - pmouseY) * .5;
   		}
 	}
 }
@@ -40,8 +41,8 @@ export function onDocumentMouseDown( event ) {
         return;
     }
     coords.dragging = true;
-    pressX = mouseX;
-    pressY = mouseY;   	
+    pressX = coords.mouse.x;
+    pressY = coords.mouse.y;
     coords.rotateT.x = undefined;
     coords.rotateT.x = undefined;
 }	
@@ -54,7 +55,7 @@ export function onDocumentMouseUp( event ){
 
 export function onClick( event ){
 	//	make the rest not work if the event was actually a drag style click
-	if( Math.abs(pressX - mouseX) > 3 || Math.abs(pressY - mouseY) > 3 )
+	if( Math.abs(pressX - coords.mouse.x) > 3 || Math.abs(pressY - coords.mouse.y) > 3 )
 		return;				
 
 	var pickColorIndex = getPickColor();	

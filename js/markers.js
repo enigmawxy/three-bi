@@ -1,6 +1,7 @@
-import {numberWithCommas} from './util'
+import {numberWithCommas, screenXY} from './util'
+import {dataObject as spec} from './main';
 
-var markers = [];
+export var markers = [];
 
 function onMarkerHover( event ){
 	var hx = event.clientX - window.innerWidth * 0.5;
@@ -12,7 +13,7 @@ function onMarkerHover( event ){
 	// 	console.log('clicked on something!!');				
 }
 
-export function attachMarkerToCountry( spec, countryName, importance ){
+export function attachMarkerToCountry( countryName, importance ){
 	//	look up the name to mesh
 	countryName = countryName.toUpperCase();
 	var country = spec.countryData[countryName];
@@ -65,7 +66,7 @@ export function attachMarkerToCountry( spec, countryName, importance ){
 	};
 
 	marker.update = function(){
-		var matrix = rotating.matrixWorld;
+		var matrix = spec.rotating.matrixWorld;
 		var abspos = matrix.multiplyVector3( country.center.clone() );
 		var screenPos = screenXY(abspos);			
 
@@ -135,7 +136,7 @@ export function attachMarkerToCountry( spec, countryName, importance ){
 
 	var markerSelect = function(e){
 		var selection = selectionData;
-		selectVisualization( timeBins, selection.selectedYear, [this.countryName], selection.getExportCategories(), selection.getImportCategories() );	
+		selectVisualization(selection.selectedYear, [this.countryName], selection.getExportCategories(), selection.getImportCategories() );
 	};
 	marker.addEventListener('click', markerSelect, true);
 

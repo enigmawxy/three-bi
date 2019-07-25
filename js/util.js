@@ -1,7 +1,9 @@
-import {Geometry, Projector, Vector3, Vector2, ExtrudeGeometry, Shape, Color} from "../lib/three/three.module";
+// import {Geometry, Projector, Vector3, Vector2, ExtrudeGeometry, Shape, Color} from "../lib/three/three.module";
+import {THREE} from '../lib/three/Three'
+import {dataObject} from "./main";
 
 function toTHREEColor( colorString ){
-	return new Color( parseInt( colorString.substr(1) , 16)  );
+	return new THREE.Color( parseInt( colorString.substr(1) , 16)  );
 }
 
 var monthNames = new Array(12);
@@ -53,7 +55,7 @@ function wrap(value, min, rangeSize) {
 
 // THREE.Curve.Utils.createLineGeometry = function( points ) {
 export function createUtilLineGeometry( points ) {
-    var geometry = new Geometry();
+    var geometry = new THREE.Geometry();
     for( var i = 0; i < points.length; i ++ ) {
         geometry.vertices.push( points[i] );
     }
@@ -62,16 +64,16 @@ export function createUtilLineGeometry( points ) {
 
 function getAbsOrigin( object3D ){
 	var mat = object3D.matrixWorld;
-	var worldpos = new Vector3();
+	var worldpos = new THREE.Vector3();
 	worldpos.x = mat.n14;
 	worldpos.y = mat.n24;
 	worldpos.z = mat.n34;
 	return worldpos;
 }
 
-function screenXY(vec3){
-	var projector = new Projector();
-	var vector = projector.projectVector( vec3.clone(), camera );
+export function screenXY(vec3){
+	var projector = new THREE.Projector();
+	var vector = projector.projectVector( vec3.clone(), dataObject.camera );
 	var result = {};
     var windowWidth = window.innerWidth;
     var minWidth = 1280;
@@ -101,7 +103,7 @@ function buildHexColumnGeo(rad, height){
 		steps: 			1,
 		bevelEnabled:  	false,
 	};
-	var extrudedGeo = new ExtrudeGeometry(shape, options);
+	var extrudedGeo = new THREE.ExtrudeGeometry(shape, options);
 	return extrudedGeo;	    	
 }
 
@@ -137,7 +139,6 @@ function save(data, filename, mime) {
             bb.append(header);
             bb.append(data);
 
-//
             fileWriter.write(bb.getBlob('tar/archive'));
             window.open(fileEntry.toURL(), "_blank", "width=400,height=10");
 
