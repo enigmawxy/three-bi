@@ -1,37 +1,21 @@
 import {THREEx} from "../lib/three/THREEx.KeyboardState";
+import {dataObject} from './main';
+import {countryColorMap} from './visualize'
+
+export var coords = {
+	rotate:  {x: 0, y:0},
+	rotateT: {x: undefined, y: undefined},
+	rotateV: {x:0, y:0},
+	dragging: false,
+	camera: undefined
+};
 
 var mouseX = 0, mouseY = 0, pmouseX = 0, pmouseY = 0;
 var pressX = 0, pressY = 0;
 
-var dragging = false;						
-
-var rotateX = 0, rotateY = 0;
-var rotateVX = 0, rotateVY = 0;
-var rotateXMax = 90 * Math.PI/180;	
-
-var rotateTargetX = undefined;
-var rotateTargetY = undefined;
-
 var keyboard = THREEx.KeyboardState();
 
-export function setRotate(x, y) {
-	rotateTargetX = x;
-	rotateTargetY = y;
-}
-
-export function setRotateV(x, y) {
-	rotateVX = x;
-	rotateVY = y;
-}
-
-export function getRotateVX() {
-	return rotateVX;
-}
-export function getRoateVY() {
-	return rotateVY;
-}
-
-function onDocumentMouseMove( event ) {
+export function onDocumentMouseMove( event ) {
 
 	pmouseX = mouseX;
 	pmouseY = mouseY;
@@ -39,36 +23,36 @@ function onDocumentMouseMove( event ) {
 	mouseX = event.clientX - window.innerWidth * 0.5;
 	mouseY = event.clientY - window.innerHeight * 0.5;
 
-	if(dragging){
+	if(coords.dragging){
 		if(keyboard.pressed("shift") === false){
-			rotateVY += (mouseX - pmouseX) / 2 * Math.PI / 180 * 0.3;
-  			rotateVX += (mouseY - pmouseY) / 2 * Math.PI / 180 * 0.3;	
+			coords.rotateV.y += (mouseX - pmouseX) / 2 * Math.PI / 180 * 0.3;
+  			coords.rotateV.x += (mouseY - pmouseY) / 2 * Math.PI / 180 * 0.3;	
   		}
   		else{
-  			camera.position.x -= (mouseX - pmouseX) * .5; 
-  			camera.position.y += (mouseY - pmouseY) * .5;
+  			coords.camera.position.x -= (mouseX - pmouseX) * .5;
+  			coords.camera.position.y += (mouseY - pmouseY) * .5;
   		}
 	}
 }
 
-function onDocumentMouseDown( event ) {	
+export function onDocumentMouseDown( event ) {
     if(event.target.className.indexOf('noMapDrag') !== -1) {
         return;
     }
-    dragging = true;			   
+    coords.dragging = true;
     pressX = mouseX;
     pressY = mouseY;   	
-    rotateTargetX = undefined;
-    rotateTargetX = undefined;
+    coords.rotateT.x = undefined;
+    coords.rotateT.x = undefined;
 }	
 
-function onDocumentMouseUp( event ){
+export function onDocumentMouseUp( event ){
 	d3Graphs.zoomBtnMouseup();
-	dragging = false;
+	coords.dragging = false;
 	histogramPressed = false;
 }
 
-function onClick( event ){
+export function onClick( event ){
 	//	make the rest not work if the event was actually a drag style click
 	if( Math.abs(pressX - mouseX) > 3 || Math.abs(pressY - mouseY) > 3 )
 		return;				
@@ -79,47 +63,44 @@ function onClick( event ){
 		var countryCode = i;
 		var countryColorIndex = countryColorMap[i];
 		if( pickColorIndex === countryColorIndex ){
-			// console.log("selecting code " + countryCode);
-			var countryName = countryLookup[countryCode];
-			// console.log("converts to " + countryName);
+			var countryName = dataObject.countryLookup[countryCode];
 			if( countryName === undefined )
 				return;			
 			if( $.inArray(countryName, selectableCountries) <= -1 )
 				return;
-			// console.log(countryName);
+
 			var selection = selectionData;
 			selection.selectedCountry = countryName;
 			selectVisualization( timeBins, selection.selectedYear, [selection.selectedCountry], selection.getExportCategories(), selection.getImportCategories() );	
-			// console.log('selecting ' + countryName + ' from click');
+
 			return;
 		}
 	}	
 }
 
-function onKeyDown( event ){	
+export function onKeyDown( event ){
 }
 
-function handleMWheel( delta ) {
-	camera.scale.z += delta * 0.1;
-	camera.scale.z = constrain( camera.scale.z, 0.7, 5.0 );
+export function handleMWheel( delta ) {
+	coords.camera.scale.z += delta * 0.1;
+	coords.camera.scale.z = constrain( coords.camera.scale.z, 0.7, 5.0 );
 }
 
 function onMouseWheel( event ){
 	var delta = 0;
 
 	if (event.wheelDelta) { /* IE/Opera. */
-	        delta = event.wheelDelta/120;
+		delta = event.wheelDelta/120;
 	} 
 	//	firefox
 	else if( event.detail ){
 		delta = -event.detail/3;
 	}
 
-	if (delta)
-	        handleMWheel(delta);
+	if (delta) handleMWheel(delta);
 
 	event.returnValue = false;			
 }	
 
-function onDocumentResize(e){
+export function onDocumentResize(e){
 }

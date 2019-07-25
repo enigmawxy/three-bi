@@ -1,27 +1,26 @@
 import {Detector} from '../lib/Detector';
 import {loadCountryCodes, loadWorldPins, loadContentData} from './dataloading';
-import {initScene} from './app'
+import {initScene, animate} from './app'
 
 var mapIndexedImage;
 var mapOutlineImage;
 
-
+export var dataObject = {'countryLookup':[], 'latlonData':[], 'timeBins':[],
+    'selectedCountry': null, 'previouslySelectedCountry': null,
+    'lookup': {'canvas': null, 'texture': null}
+};
 
 // Main program entry
 function start() {
     if(!Detector.webgl) {
         Detector.addGetWebGLMessage();
     } else {
-        //	a list of weapon 'codes'
-        //	now they are just strings of categories
-        //	Category Name : Category Code
         var weaponLookup = {
             'Military Weapons' 		: 'mil',
             'Civilian Weapons'		: 'civ',
             'Ammunition'			: 'ammo',
         };
 
-        //	a list of the reverse for easy lookup
         var reverseWeaponLookup = {};
         for( var i in weaponLookup ){
             var name = i;
@@ -29,12 +28,11 @@ function start() {
             reverseWeaponLookup[code] = name;
         }
 
+        dataObject.reverseWeaponLookup = reverseWeaponLookup;
+
         var Selection = function(){
             this.selectedYear = '2010';
             this.selectedCountry = 'UNITED STATES';
-            // this.showExports = true;
-            // this.showImports = true;
-            // this.importExportFilter = 'both';
 
             this.exportCategories = {};
             this.importCategories = {};
@@ -62,12 +60,7 @@ function start() {
             }
         };
 
-        var dataObject = {'countryLookup':[], 'latlonData':[], 'timeBins':[],
-            'selectionData': new Selection(),
-            'selectedCountry': null, 'previouslySelectedCountry': null,
-            'reverseWeaponLookup': reverseWeaponLookup,
-            'lookup': {'canvas': null, 'texture': null}
-        };
+        dataObject.selectionData = new Selection();
 
         mapIndexedImage = new Image();
         mapIndexedImage.src = 'images/map_indexed.png';
@@ -83,6 +76,7 @@ function start() {
                             dataObject['selectableCountries'] =[];
                             dataObject['countryData'] = {};
                             initScene(dataObject);
+                            animate();
                         })
                     })
                 });

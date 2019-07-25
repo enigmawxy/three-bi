@@ -6,8 +6,8 @@ import {
 
 import {createUtilLineGeometry} from './util';
 import {removeMarkerFromCountry, attachMarkerToCountry} from  './markers'
-import {setRotate, setRotateV, getRoateVY, getRotateVX} from './mousekeyboard';
-import {d3Graphs} from './ui.controls_test';
+import {coords} from './mousekeyboard';
+import {d3Graphs} from '../lib/ui.controls';
 
 var globeRadius = 1000;
 var vec3_origin = new Vector3(0,0,0);
@@ -22,7 +22,7 @@ export function buildDataVizGeometries( spec ){
 		var year = spec.timeBins[i].t;
 		selectableYears.push(year);	
 
-		console.log('Building data for ...' + year);
+		// console.log('Building data for ...' + year);
 		for( var s in yearBin ){
 			var set = yearBin[s];
 
@@ -454,7 +454,7 @@ export function selectVisualization( spec, rotating, visualizationMesh, year, co
 
 	if( spec.previouslySelectedCountry !== spec.selectedCountry ){
 		if( spec.selectedCountry ){
-			var rotateTargetX = spec.selectedCountry.lat * Math.PI/180;
+			coords.rotateT.x = spec.selectedCountry.lat * Math.PI/180;
 			var rotateTargetY;
 			var targetY0 = -(spec.selectedCountry.lon - 9) * Math.PI / 180;
             var piCounter = 0;
@@ -465,20 +465,20 @@ export function selectVisualization( spec, rotating, visualizationMesh, year, co
                     rotateTargetY = targetY0Neg;
                     break;
                 } else if(Math.abs(targetY0Pos - rotating.rotation.y) < Math.PI) {
-                    rotateTargetY = targetY0Pos;
+					coords.rotateT.y = targetY0Pos;
                     break;
                 }
                 piCounter++;
                 rotateTargetY = wrap(targetY0, -Math.PI, Math.PI);
 			}
 
-			setRotate(rotateTargetX, rotateTargetY);
+			coords.rotateV.x *= 0.6;
+			coords.rotateV.y *= 0.6;
 			// rotateVX *= 0.6;
 			// rotateVY *= 0.6;
-			setRotateV(getRotateVX() * 0.6, getRoateVY() * 0.6);
 		}	
 	}
-	console.log(spec);
+
     d3Graphs.initGraphs(spec);
 }
 
@@ -493,7 +493,7 @@ function findCode(spec, countryName){
 
 //	ordered lookup list for country color index
 //	used for GLSL to find which country needs to be highlighted
-var countryColorMap = {'PE':1,
+export var countryColorMap = {'PE':1,
 	'BF':2,'FR':3,'LY':4,'BY':5,'PK':6,'ID':7,'YE':8,'MG':9,'BO':10,'CI':11,'DZ':12,'CH':13,'CM':14,'MK':15,'BW':16,'UA':17,
 	'KE':18,'TW':19,'JO':20,'MX':21,'AE':22,'BZ':23,'BR':24,'SL':25,'ML':26,'CD':27,'IT':28,'SO':29,'AF':30,'BD':31,'DO':32,'GW':33,
 	'GH':34,'AT':35,'SE':36,'TR':37,'UG':38,'MZ':39,'JP':40,'NZ':41,'CU':42,'VE':43,'PT':44,'CO':45,'MR':46,'AO':47,'DE':48,'SD':49,

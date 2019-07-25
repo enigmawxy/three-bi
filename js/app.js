@@ -1,12 +1,29 @@
-import {Scene, AmbientLight, SpotLight, PointLight, Object3D,
-        Texture, NearestFilter, ShaderMaterial, Mesh, SphereGeometry
+import {Scene, AmbientLight, SpotLight, PointLight, Object3D, WebGLRenderer,
+        Texture, NearestFilter, ShaderMaterial, Mesh, SphereGeometry, PerspectiveCamera
         } from '../lib/three/three.module'
 import {loadGeoData} from './geopins';
 import '../lib/jquery-1.7.1.min'
 import {buildDataVizGeometries, selectVisualization} from './visualize';
 
+import {THREEx} from "../lib/three/THREEx.WindowResize";
+import {onDocumentMouseMove, onDocumentResize, onDocumentMouseDown,
+        onDocumentMouseUp, onMouseWheel, onClick, onKeyDown, coords} from './mousekeyboard';
+
+var camera, scene, renderer, controls, rotating;
+//	where in html to hold all our things
+var glContainer = document.getElementById( 'glContainer' );
+var masterContainer = document.getElementById('visualization');
+var controllers = {
+    speed: 			3,
+    multiplier: 	0.5,
+    backgroundColor:"#000000",
+    zoom: 			1,
+    spin: 			0,
+    transitionTime: 2000,
+};
+
 export function initScene(spec) {
-    var scene = new Scene();
+    scene = new Scene();
     scene.matrixAutoUpdate = false;
 
     scene.add(new AmbientLight(0x505050));
@@ -24,7 +41,7 @@ export function initScene(spec) {
     light2.position.z = -1000;
     scene.add(light2);
 
-    var rotating = new Object3D();
+    rotating = new Object3D();
     scene.add(rotating);
 
     var lookupCanvas = document.createElement('canvas');
@@ -103,4 +120,51 @@ export function initScene(spec) {
     // buildGUI(); 忽略
     selectVisualization( spec, rotating, visualizationMesh,'2010', ['UNITED STATES'], ['Military Weapons','Civilian Weapons', 'Ammunition'], ['Military Weapons','Civilian Weapons', 'Ammunition'] );
 
+    //	-----------------------------------------------------------------------------
+    //	Setup our renderer
+    renderer = new WebGLRenderer({antialias:false});
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.autoClear = false;
+
+    renderer.sortObjects = false;
+    renderer.generateMipmaps = false;
+
+    glContainer.appendChild( renderer.domElement );
+
+    //	-----------------------------------------------------------------------------
+    //	Event listeners
+    document.addEventListener( 'mousemove', onDocumentMouseMove, true );
+    document.addEventListener( 'windowResize', onDocumentResize, false );
+
+    //masterContainer.addEventListener( 'mousedown', onDocumentMouseDown, true );
+    //masterContainer.addEventListener( 'mouseup', onDocumentMouseUp, false );
+    document.addEventListener( 'mousedown', onDocumentMouseDown, true );
+    document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+
+    masterContainer.addEventListener( 'click', onClick, true );
+    masterContainer.addEventListener( 'mousewheel', onMouseWheel, false );
+
+    //	firefox
+    masterContainer.addEventListener( 'DOMMouseScroll', function(e){
+        var evt=window.event || e; //equalize event object
+        onMouseWheel(evt);
+    }, false );
+
+    document.addEventListener( 'keydown', onKeyDown, false);
+
+    //	-----------------------------------------------------------------------------
+    //	Setup our camera
+    camera = new PerspectiveCamera( 12, window.innerWidth / window.innerHeight, 1, 20000 );
+    camera.position.z = 1400;
+    camera.position.y = 0;
+    camera.lookAt(scene.width/2, scene.height/2);
+    scene.add( camera );
+
+    var windowResize;
+    windowResize = THREEx.WindowResize(renderer, camera);
+}
+
+export function animate() {
+    coords.rotate.x = 2;
+    console.log(coords);
 }
