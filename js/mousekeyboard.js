@@ -15,7 +15,6 @@ export var coords = {
 
 var pmouseX = 0, pmouseY = 0;
 var pressX = 0, pressY = 0;
-
 var keyboard = THREEx.KeyboardState();
 
 export function onDocumentMouseMove( event ) {
