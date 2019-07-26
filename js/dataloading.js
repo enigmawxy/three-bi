@@ -1,4 +1,6 @@
-export function loadWorldPins(latlonFile, data, callback ){
+import {dataObject as data} from "./main";
+
+export function loadWorldPins(latlonFile, callback ){
 	// We're going to ask a file for the JSON data.
 	var xhr = new XMLHttpRequest();
 
@@ -20,7 +22,7 @@ export function loadWorldPins(latlonFile, data, callback ){
 	xhr.send( null );
 }
 
-export function loadContentData(filePath, data, callback){
+export function loadContentData(filePath, callback){
 	// var filePath = "categories/All.json";
 	filePath = encodeURI( filePath );
 
@@ -45,7 +47,7 @@ export function loadContentData(filePath, data, callback){
 	xhr.send( null );
 }
 
-export function loadCountryCodes(isoFile, data, callback ){
+export function loadCountryCodes(isoFile, callback ){
 	var cxhr = new XMLHttpRequest();
 	cxhr.open( 'GET', isoFile, true );
 	cxhr.onreadystatechange = function() {

@@ -2,45 +2,34 @@ import {Detector} from '../lib/Detector';
 import {loadCountryCodes, loadWorldPins, loadContentData} from './dataloading';
 import {initScene, animate} from './app'
 
-var mapIndexedImage;
-var mapOutlineImage;
-
-export var dataObject = {'countryLookup':[], 'latlonData':[], 'timeBins':[],
-    'selectedCountry': null, 'previouslySelectedCountry': null,
-    'lookup': {'canvas': null, 'texture': null}
+// dataObject作为全局的变量，可以通过import或export指令引用其内容
+export var dataObject = {
+    'countryLookup': [],
+    'latlonData': [],
+    'timeBins':[],
+    'selectedCountry': null,
+    'previouslySelectedCountry': null,
+    'lookup': {'canvas': null, 'texture': null},
+    'reverseWeaponLookup': {'ammo': 'Ammunition', 'civ':  'Civilian Weapons', 'mil':  'Military Weapons'}
 };
 
 // Main program entry
-function start() {
+(function start() {
     if(!Detector.webgl) {
         Detector.addGetWebGLMessage();
     } else {
-        var weaponLookup = {
-            'Military Weapons' 		: 'mil',
-            'Civilian Weapons'		: 'civ',
-            'Ammunition'			: 'ammo',
-        };
-
-        var reverseWeaponLookup = {};
-        for( var i in weaponLookup ){
-            var name = i;
-            var code = weaponLookup[i];
-            reverseWeaponLookup[code] = name;
-        }
-
-        dataObject.reverseWeaponLookup = reverseWeaponLookup;
-
         var Selection = function(){
             this.selectedYear = '2010';
             this.selectedCountry = 'UNITED STATES';
 
             this.exportCategories = {};
             this.importCategories = {};
-            for( var i in weaponLookup ){
-                this.exportCategories[i] = true;
-                this.importCategories[i] = true;
-            }
 
+            for( var i in dataObject.reverseWeaponLookup ){
+                var index = dataObject.reverseWeaponLookup[i];
+                this.exportCategories[index] = true;
+                this.importCategories[index] = true;
+            }
             this.getExportCategories = function(){
                 var list = [];
                 for( var i in this.exportCategories ){
@@ -62,15 +51,15 @@ function start() {
 
         dataObject.selectionData = new Selection();
 
-        mapIndexedImage = new Image();
+        var mapIndexedImage = new Image();
         mapIndexedImage.src = 'images/map_indexed.png';
         mapIndexedImage.onload = function() {
-            mapOutlineImage = new Image();
+            var mapOutlineImage = new Image();
             mapOutlineImage.src = 'images/map_outline.png';
             mapOutlineImage.onload = function () {
-                loadCountryCodes('json/country_iso3166.json', dataObject, function () {
-                    loadWorldPins('json/country_lat_lon.json', dataObject, function () {
-                        loadContentData('json/All.json', dataObject, function () {
+                loadCountryCodes('json/country_iso3166.json',  function () {
+                    loadWorldPins('json/country_lat_lon.json',  function () {
+                        loadContentData('json/All.json',  function () {
                             dataObject['indexImage'] = mapIndexedImage;
                             dataObject['outlineImage'] = mapOutlineImage;
                             dataObject['selectableCountries'] =[];
@@ -83,6 +72,4 @@ function start() {
             };
         };
     }
-}
-
-start();
+}());
