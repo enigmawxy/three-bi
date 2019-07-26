@@ -1,24 +1,12 @@
 // import {Vector3} from '../lib/three/three.module'
 import {THREE} from '../lib/three/Three'
 export function loadGeoData(spec){
-    //	-----------------------------------------------------------------------------
-    //	Load the world geo data json, per country	
+    var rad = 100;
 
-	var sphereRad = 1;				
-	var rad = 100;
-
-	// console.log(spec.countryData);
-	// console.log(spec.latlonData);
 	//	iterate through each set of country pins
 	for ( var i in spec.latlonData.countries ) {
 		var country = spec.latlonData.countries[i];
 		
-		//	can we even find the country in the list?
-		// if( countryLookup[country.n.toUpperCase()] === undefined ){
-		// 	console.log('could not find country that has country code: ' + country.n)
-		// 	continue;				
-		// }
-
 		//	save out country name and code info
 		country.countryCode = i;
 		country.countryName = spec.countryLookup[i];
@@ -39,11 +27,4 @@ export function loadGeoData(spec){
 		country.center = center;
 		spec.countryData[country.countryName] = country;
 	}		
-
-	// console.log(countryData);
-}					
-
-//	convenience function to get the country object by name
-// function getCountry(name){
-// 	return countryData[name.toUpperCase()]
-// }
+}

@@ -1,6 +1,6 @@
 import KeyboardState from "../lib/three/THREEx.kbs";
 import {dataObject} from './main';
-import {countryColorMap, selectVisualization} from './visualize'
+import {countryColorMap, selectVisualization, constrain} from './visualize'
 import {d3Graphs} from '../lib/ui.controls';
 import {getPickColor} from './app'
 

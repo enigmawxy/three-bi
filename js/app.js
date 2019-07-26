@@ -74,7 +74,6 @@ export function initScene() {
         'outlineLevel': {type: 'f', value: 1},
     };
 
-
     spec.mapUniforms = uniforms;
 
     var shaderMaterial = new THREE.ShaderMaterial({
@@ -90,6 +89,7 @@ export function initScene() {
     sphere.rotation.x = Math.PI;
     sphere.rotation.y = -Math.PI / 2;
     sphere.rotation.z = Math.PI;
+    sphere.id = "base";
     rotating.add(sphere);
 
     for (var i in spec.timeBins) {
@@ -170,8 +170,7 @@ export function initScene() {
     scene.add( camera );
     spec.camera = camera;
 
-    var windowResize;
-    windowResize = THREEx.WindowResize(renderer, camera);
+    THREEx.WindowResize(renderer, camera);
 }
 
 export function animate() {

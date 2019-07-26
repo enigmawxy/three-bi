@@ -55,7 +55,7 @@ function makeConnectionLineGeometry( exporter, importer, value, type ){
 	var deltaZ = exporter.center.z - importer.center.z;
 
 	var distanceBetweenCountryCenter = Math.sqrt(deltaX*deltaX+deltaY*deltaY+deltaZ*deltaZ);
-	// var distanceBetweenCountryCenter = exporter.center.clone().subSelf(importer.center).length();
+	// var distanceBetweenCountryCenter1 = exporter.center.clone().subSelf(importer.center).length();
 
 	//	how high we want to shoot the curve upwards
 	var anchorHeight = globeRadius + distanceBetweenCountryCenter * 0.7;
@@ -71,7 +71,7 @@ function makeConnectionLineGeometry( exporter, importer, value, type ){
 	mid.x += (end.x - mid.x) * 0.5;
 	mid.y += (end.y - mid.y) * 0.5;
 	mid.z += (end.z - mid.z) * 0.5;
-	// var mid = start.clone().lerpSelf(end,0.5);
+	// var mid1 = start.clone().lerpSelf(end,0.5);
 	var midLength = mid.length();
 	mid.normalize();
 	mid.multiplyScalar( midLength + distanceBetweenCountryCenter * 0.7 );
@@ -96,8 +96,8 @@ function makeConnectionLineGeometry( exporter, importer, value, type ){
 	var distanceHalf = distanceBetweenCountryCenter * 0.5;
 
 	var startAnchor = start;
-	// var midStartAnchor = mid.clone().addSelf( normal.clone().multiplyScalar( distanceHalf ) );
-	// var midEndAnchor = mid.clone().addSelf( normal.clone().multiplyScalar( -distanceHalf ) );
+	// var midStartAnchor1 = mid.clone().addSelf( normal.clone().multiplyScalar( distanceHalf ) );
+	// var midEndAnchor1 = mid.clone().addSelf( normal.clone().multiplyScalar( -distanceHalf ) );
 	var midStartAnchor = mid.clone();
 	var bj1 = normal.clone().multiplyScalar( distanceHalf );
 	midStartAnchor.x += bj1.x;
@@ -408,7 +408,7 @@ export function selectVisualization( year, countries, exportCategories, importCa
 			total: 0,
 		},
 		total: 0,
-		historical: getHistoricalData(spec),
+		historical: getHistoricalData(),
 	};
 
 	//	clear off the country's internally held color data we used from last highlight
@@ -421,7 +421,7 @@ export function selectVisualization( year, countries, exportCategories, importCa
 
 	//	clear markers
 	for( var i in spec.selectableCountries ){
-		removeMarkerFromCountry( spec.selectableCountries[i], spec.countryData );
+		removeMarkerFromCountry( spec.selectableCountries[i]);
 	}
 
 	//	clear children
@@ -450,33 +450,29 @@ export function selectVisualization( year, countries, exportCategories, importCa
 		attachMarkerToCountry(countryName, country.mapColor);
 	}
 
-	// console.log( mesh.affectedCountries );
 	highlightCountry(mesh.affectedCountries );
 
 	if( spec.previouslySelectedCountry !== spec.selectedCountry ){
 		if( spec.selectedCountry ){
 			coords.rotateT.x = spec.selectedCountry.lat * Math.PI/180;
-			var rotateTargetY;
 			var targetY0 = -(spec.selectedCountry.lon - 9) * Math.PI / 180;
             var piCounter = 0;
 			while(true) {
                 var targetY0Neg = targetY0 - Math.PI * 2 * piCounter;
                 var targetY0Pos = targetY0 + Math.PI * 2 * piCounter;
                 if(Math.abs(targetY0Neg - spec.rotating.rotation.y) < Math.PI) {
-                    rotateTargetY = targetY0Neg;
+					coords.rotateT.y = targetY0Neg;
                     break;
                 } else if(Math.abs(targetY0Pos - spec.rotating.rotation.y) < Math.PI) {
 					coords.rotateT.y = targetY0Pos;
                     break;
                 }
                 piCounter++;
-                rotateTargetY = wrap(targetY0, -Math.PI, Math.PI);
+				coords.rotateT.y = wrap(targetY0, -Math.PI, Math.PI);
 			}
 
 			coords.rotateV.x *= 0.6;
 			coords.rotateV.y *= 0.6;
-			// rotateVX *= 0.6;
-			// rotateVY *= 0.6;
 		}	
 	}
 
@@ -545,11 +541,10 @@ export function highlightCountry(countries ){
 	spec.lookup.texture.needsUpdate = true;
 }
 
-function getHistoricalData( spec ){
+function getHistoricalData(){
 	var history = [];
 
 	var countryName = spec.selectedCountry.countryName;
-
 	var exportCategories = spec.selectionData.getExportCategories();
 	var importCategories = spec.selectionData.getImportCategories();
 

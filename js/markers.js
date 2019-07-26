@@ -5,16 +5,6 @@ import {selectVisualization} from './visualize';
 
 export var markers = [];
 
-function onMarkerHover( event ){
-	var hx = event.clientX - window.innerWidth * 0.5;
-	var hy = event.clientY - window.innerHeight * 0.5;
-	var dx = mouseX - hx;
-	var dy = mouseY - hy;
-	var d = Math.sqrt( dx * dx + dy * dy );
-	// if( event.target.style.visibility == 'visible' )
-	// 	console.log('clicked on something!!');				
-}
-
 export function attachMarkerToCountry( countryName, importance ){
 	//	look up the name to mesh
 	countryName = countryName.toUpperCase();
@@ -145,9 +135,9 @@ export function attachMarkerToCountry( countryName, importance ){
 	markers.push( marker );
 }		
 
-export function removeMarkerFromCountry( countryName, countryData ){
+export function removeMarkerFromCountry( countryName){
 	countryName = countryName.toUpperCase();
-	var country = countryData[countryName];
+	var country = spec.countryData[countryName];
 	if( country === undefined )
 		return;
 	if( country.marker === undefined )
