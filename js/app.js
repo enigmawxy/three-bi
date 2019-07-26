@@ -212,37 +212,38 @@ export function animate() {
     rotating.rotation.x = coords.rotate.x;
     rotating.rotation.y = coords.rotate.y;
 
-    render();
-
-    requestAnimationFrame( animate );
-
-    scene.traverse(scene, function (mesh) {
-        if (mesh.update !== undefined) {
-            mesh.update();
-        }
-    });
-    // function traverseHierarchy( root, callback ) {
-    //
-    //     var n, i, l = root.children.length;
-    //
-    //     for ( i = 0; i < l; i ++ ) {
-    //
-    //         n = root.children[ i ];
-    //
-    //         callback( n );
-    //
-    //         traverseHierarchy( n, callback );
-    //
-    //     }
-    //
-    // }
-    //
-    // traverseHierarchy(rotating, function (mesh) {
+    // scene.traverse(scene, function (mesh) {
     //     if (mesh.update !== undefined) {
     //         mesh.update();
     //     }
-    // })
+    // });
+    function traverseHierarchy( root, callback ) {
 
+        var n, i, l = root.children.length;
+
+        for ( i = 0; i < l; i ++ ) {
+
+            n = root.children[ i ];
+
+            callback( n );
+
+            traverseHierarchy( n, callback );
+
+        }
+
+    }
+    var j = 0;
+    traverseHierarchy(rotating, function (mesh) {
+        if (mesh.update !== undefined) {
+            j++;
+            mesh.update();
+        }
+    });
+    console.log(j);
+
+    render();
+
+    requestAnimationFrame( animate );
     //
     //
     // // THREE.SceneUtils.traverseHierarchy( rotating,
@@ -260,7 +261,7 @@ export function animate() {
 }
 
 function render() {
-    // renderer.clear();
+    renderer.clear();
     renderer.render( scene, camera );
 }
 

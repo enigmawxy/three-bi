@@ -336,7 +336,7 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 	// var bufferGeometry = new THREE.BufferGeometry().fromGeometry( particlesGeo );
 	// bufferGeometry.attributes = attributes;
 	// particlesGeo.attributes = attributes;
-	var pSystem = new THREE.Points( particlesGeo, shaderMaterial );
+	var pSystem = new THREE.Points( particlesGeo, particleMat );
 	pSystem.dynamic = true;
 	splineOutline.add( pSystem );
 
@@ -372,7 +372,10 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 			
 
 			particle.copy( currentPoint );
-			particle.lerpSelf( nextPoint, particle.lerpN );			
+			// particle.lerpSelf( nextPoint, particle.lerpN );
+			particle.x += (nextPoint.x - particle.x) * particle.lerpN;
+			particle.y += (nextPoint.y - particle.y) * particle.lerpN;
+			particle.z += (nextPoint.z - particle.z) * particle.lerpN;
 		}
 		this.geometry.verticesNeedUpdate = true;
 	};		

@@ -59,6 +59,7 @@ export function createUtilLineGeometry( points ) {
     for( var i = 0; i < points.length; i ++ ) {
         geometry.vertices.push( points[i] );
     }
+
     return geometry;
 }
 
