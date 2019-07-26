@@ -71,7 +71,7 @@ function makeConnectionLineGeometry( exporter, importer, value, type ){
 	mid.x += (end.x - mid.x) * 0.5;
 	mid.y += (end.y - mid.y) * 0.5;
 	mid.z += (end.z - mid.z) * 0.5;
-	// var mid1 = start.clone().lerpSelf(end,0.5);
+	// var mid = start.clone().lerpSelf(end,0.5);
 	var midLength = mid.length();
 	mid.normalize();
 	mid.multiplyScalar( midLength + distanceBetweenCountryCenter * 0.7 );
@@ -174,7 +174,6 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 	var lineColors = [];
 
 	var particlesGeo = new THREE.Geometry();
-	// var particlesGeo = new THREE.BufferGeometry();
 	var particleColors = [];
 
 	//	go through the data from year, and find all relevant geometries
@@ -336,7 +335,7 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 	// var bufferGeometry = new THREE.BufferGeometry().fromGeometry( particlesGeo );
 	// bufferGeometry.attributes = attributes;
 	// particlesGeo.attributes = attributes;
-	var pSystem = new THREE.Points( particlesGeo, particleMat );
+	var pSystem = new THREE.Points( particlesGeo, shaderMaterial );
 	pSystem.dynamic = true;
 	splineOutline.add( pSystem );
 
