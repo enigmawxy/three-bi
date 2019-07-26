@@ -1,8 +1,5 @@
 import {dataObject as spec} from './main';
-// import {Scene, AmbientLight, SpotLight, PointLight, Object3D, WebGLRenderer, SceneUtils,
-//         Texture, NearestFilter, ShaderMaterial, Mesh, SphereGeometry, PerspectiveCamera
-//         } from '../lib/three/three.module'
-import {THREE} from '../lib/three/Three'
+import * as THREE from 'three';
 import {loadGeoData} from './geopins';
 import '../lib/jquery-1.7.1.min'
 import {buildDataVizGeometries, selectVisualization} from './visualize';
@@ -89,7 +86,7 @@ export function initScene() {
     sphere.rotation.x = Math.PI;
     sphere.rotation.y = -Math.PI / 2;
     sphere.rotation.z = Math.PI;
-    sphere.id = "base";
+    // sphere.id = "base";
     rotating.add(sphere);
 
     for (var i in spec.timeBins) {
@@ -117,7 +114,7 @@ export function initScene() {
     console.timeEnd('loadGeoData');
 
     console.time('buildDataVizGeometries');
-    var vizilines = buildDataVizGeometries();
+    buildDataVizGeometries();
     console.timeEnd('buildDataVizGeometries');
 
     var visualizationMesh = new THREE.Object3D();
@@ -219,23 +216,51 @@ export function animate() {
 
     requestAnimationFrame( animate );
 
-
-    THREE.SceneUtils.traverseHierarchy( rotating,
-        function(mesh) {
-            if (mesh.update !== undefined) {
-                mesh.update();
-            }
+    scene.traverse(scene, function (mesh) {
+        if (mesh.update !== undefined) {
+            mesh.update();
         }
-    );
+    });
+    // function traverseHierarchy( root, callback ) {
+    //
+    //     var n, i, l = root.children.length;
+    //
+    //     for ( i = 0; i < l; i ++ ) {
+    //
+    //         n = root.children[ i ];
+    //
+    //         callback( n );
+    //
+    //         traverseHierarchy( n, callback );
+    //
+    //     }
+    //
+    // }
+    //
+    // traverseHierarchy(rotating, function (mesh) {
+    //     if (mesh.update !== undefined) {
+    //         mesh.update();
+    //     }
+    // })
 
-    for( var i in markers ){
-        var marker = markers[i];
-        marker.update();
-    }
+    //
+    //
+    // // THREE.SceneUtils.traverseHierarchy( rotating,
+    // //     function(mesh) {
+    // //         if (mesh.update !== undefined) {
+    // //             mesh.update();
+    // //         }
+    // //     }
+    // // );
+    //
+    // for( var i in markers ){
+    //     var marker = markers[i];
+    //     marker.update();
+    // }
 }
 
 function render() {
-    renderer.clear();
+    // renderer.clear();
     renderer.render( scene, camera );
 }
 

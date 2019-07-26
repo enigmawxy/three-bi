@@ -1,5 +1,5 @@
 // import {Geometry, Projector, Vector3, Vector2, ExtrudeGeometry, Shape, Color} from "../lib/three/three.module";
-import {THREE} from '../lib/three/Three'
+import * as THREE from 'three';
 import {dataObject} from "./main";
 
 function toTHREEColor( colorString ){

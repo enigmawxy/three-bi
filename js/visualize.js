@@ -4,7 +4,7 @@ import {dataObject as spec} from './main';
 // 	AdditiveBlending, ShaderMaterial, LineBasicMaterial, TextureLoader,
 // 	NormalBlending, PointsMaterial, Points
 // } from "../lib/three/three.module";
-import {THREE} from '../lib/three/Three'
+import * as THREE from 'three';
 import {createUtilLineGeometry} from './util';
 import {removeMarkerFromCountry, attachMarkerToCountry} from  './markers'
 import {coords} from './mousekeyboard';
@@ -77,8 +77,7 @@ function makeConnectionLineGeometry( exporter, importer, value, type ){
 	mid.multiplyScalar( midLength + distanceBetweenCountryCenter * 0.7 );
 
 	//	the normal from start to end
-	// var normal = (new Vector3()).sub(start,end);
-	var normal = (new THREE.Vector3()).sub(start,end);
+	var normal = (new THREE.Vector3()).subVectors(start,end);
 	normal.normalize();
 
 	/*
@@ -175,6 +174,7 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 	var lineColors = [];
 
 	var particlesGeo = new THREE.Geometry();
+	// var particlesGeo = new THREE.BufferGeometry();
 	var particleColors = [];
 
 	//	go through the data from year, and find all relevant geometries
@@ -217,7 +217,8 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 			}
 
 			//	merge it all together
-			THREE.GeometryUtils.merge( linesGeo, set.lineGeometry );
+			set.lineGeometry.merge(linesGeo);
+			// THREE.GeometryUtils.merge( linesGeo, set.lineGeometry );
 			// Geometry.merge( linesGeo, set.lineGeometry );
 
 			var particleColor = lastColor.clone();		
@@ -285,8 +286,6 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 		}		
 	}
 
-	// console.log(selectedCountry);
-
 	linesGeo.colors = lineColors;	
 
 	//	make a final mesh out of this composite
@@ -299,7 +298,7 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 
 	splineOutline.renderDepth = false;
 
-
+	// attributes should now be defined in THREE.BufferGeometry instead.
 	var attributes = {
 		size: {	type: 'f', value: [] },
 		customColor: { type: 'c', value: [] }
@@ -308,13 +307,13 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 	var uniforms = {
 		amplitude: { type: "f", value: 1.0 },
 		color:     { type: "c", value: new THREE.Color( 0xffffff ) },
-		texture:   { type: "t", value: 0, texture: new THREE.ImageUtils.loadTexture("images/particleA.png" ) },
+		texture:   { type: "t", value: 0, texture: new THREE.TextureLoader().load("images/particleA.png" ) },
 	};
 
 	var shaderMaterial = new THREE.ShaderMaterial( {
 
 		uniforms: 		uniforms,
-		attributes:     attributes, // No such attributes in current three version
+		// attributes:     attributes, // No such attributes in current three version
 		vertexShader:   document.getElementById( 'vertexshader' ).textContent,
 		fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
 
@@ -327,18 +326,17 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 
 
 
-	var particleGraphic = new THREE.ImageUtils.loadTexture("images/map_mask.png");
-	var particleMat = new THREE.ParticleBasicMaterial( { map: particleGraphic, color: 0xffffff, size: 60,
+	var particleGraphic = new THREE.TextureLoader().load("images/map_mask.png");
+	var particleMat = new THREE.PointsMaterial( { map: particleGraphic, color: 0xffffff, size: 60,
 														blending: THREE.NormalBlending, transparent:true,
 														depthWrite: false, vertexColors: true,
 														sizeAttenuation: true } );
-	// var particleMat = new PointsMaterial( { map: particleGraphic, color: 0xffffff, size: 60,
-	// 													blending: NormalBlending, transparent:true,
-	// 													depthWrite: false, vertexColors: true,
-	// 													sizeAttenuation: true } );
 	particlesGeo.colors = particleColors;
-	var pSystem = new THREE.ParticleSystem( particlesGeo, shaderMaterial );
-	// var pSystem = new Points( particlesGeo, shaderMaterial );
+	particlesGeo.morphAttributes = attributes;
+	// var bufferGeometry = new THREE.BufferGeometry().fromGeometry( particlesGeo );
+	// bufferGeometry.attributes = attributes;
+	// particlesGeo.attributes = attributes;
+	var pSystem = new THREE.Points( particlesGeo, shaderMaterial );
 	pSystem.dynamic = true;
 	splineOutline.add( pSystem );
 
