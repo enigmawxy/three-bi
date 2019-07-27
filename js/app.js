@@ -112,9 +112,9 @@ export function initScene() {
                 shininess: 10
             },
             textures: {
-                map: '../images/earthmap1k.jpg',
-                bumpMap: '../images/earthbump1k.jpg',
-                specularMap: '../images/earthspec1k.jpg'
+                map: 'images/earthmap1k.jpg',
+                bumpMap: 'images/earthbump1k.jpg',
+                specularMap: 'images/earthspec1k.jpg'
             }
         },
         atmosphere: {
@@ -123,8 +123,8 @@ export function initScene() {
                 opacity: 0.8
             },
             textures: {
-                map: '../images/earthcloudmap.jpg',
-                alphaMap: '../images/earthcloudmaptrans.jpg'
+                map: 'images/earthcloudmap.jpg',
+                alphaMap: 'images/earthcloudmaptrans.jpg'
             },
             glow: {
                 size: 0.05,
