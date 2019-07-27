@@ -59,7 +59,8 @@ export function attachMarkerToCountry( countryName, importance ){
 
 	marker.update = function(){
 		var matrix = spec.rotating.matrixWorld;
-		var abspos = matrix.multiplyVector3( country.center.clone() );
+		var abspos = country.center.clone().applyMatrix4(matrix);
+		// var abspos = matrix.multiplyVector3( country.center.clone() );
 		var screenPos = screenXY(abspos);			
 
 		var s = 0.3 + spec.camera.scale.z * 1;

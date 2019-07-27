@@ -1,5 +1,7 @@
 // import {Geometry, Projector, Vector3, Vector2, ExtrudeGeometry, Shape, Color} from "../lib/three/three.module";
 import * as THREE from 'three';
+import {THREEp} from '../lib/three/Projector';
+
 import {dataObject} from "./main";
 
 function toTHREEColor( colorString ){
@@ -73,7 +75,7 @@ function getAbsOrigin( object3D ){
 }
 
 export function screenXY(vec3){
-	var projector = new THREE.Projector();
+	var projector = new THREEp.Projector();
     var vector = projector.projectVector( vec3.clone(), dataObject.camera );
 	var result = {};
     var windowWidth = window.innerWidth;

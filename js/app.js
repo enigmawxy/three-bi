@@ -232,32 +232,30 @@ export function animate() {
         }
 
     }
-    var j = 0;
+
     traverseHierarchy(rotating, function (mesh) {
         if (mesh.update !== undefined) {
-            j++;
-            mesh.update();
+           mesh.update();
         }
     });
-    console.log(j);
+    
 
     render();
 
     requestAnimationFrame( animate );
-    //
-    //
-    // // THREE.SceneUtils.traverseHierarchy( rotating,
-    // //     function(mesh) {
-    // //         if (mesh.update !== undefined) {
-    // //             mesh.update();
-    // //         }
-    // //     }
-    // // );
-    //
-    // for( var i in markers ){
-    //     var marker = markers[i];
-    //     marker.update();
-    // }
+
+    // THREE.SceneUtils.traverse( rotating,
+    //     function(mesh) {
+    //         if (mesh.update !== undefined) {
+    //             mesh.update();
+    //         }
+    //     }
+    // );
+
+    for( var i in markers ){
+        var marker = markers[i];
+        marker.update();
+    }
 }
 
 function render() {
