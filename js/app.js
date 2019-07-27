@@ -1,5 +1,6 @@
 import {dataObject as spec} from './main';
 import * as THREE from 'three';
+import Earth from './earth';
 import {loadGeoData} from './geopins';
 import '../lib/jquery-1.7.1.min'
 import {buildDataVizGeometries, selectVisualization} from './visualize';
@@ -42,8 +43,8 @@ export function initScene() {
     light2.position.z = -1000;
     scene.add(light2);
 
-    rotating = new THREE.Object3D();
-    scene.add(rotating);
+    // rotating = new THREE.Object3D();
+    // scene.add(rotating);
 
     var lookupCanvas = document.createElement('canvas');
     lookupCanvas.width = 256;
@@ -64,6 +65,7 @@ export function initScene() {
     var outlinedMapTexture = new THREE.Texture(spec.outlineImage);
     outlinedMapTexture.needsUpdate = true;
 
+    ///
     var uniforms = {
         'mapIndex': {type: 't', value: 0, texture: indexedMapTexture},
         'lookup': {type: 't', value: 1, texture: lookupTexture},
@@ -72,29 +74,68 @@ export function initScene() {
     };
 
     spec.mapUniforms = uniforms;
-
-    var shaderMaterial = new THREE.ShaderMaterial({
-        uniforms: uniforms,
-        vertexShader: document.getElementById('globeVertexShader').textContent,
-        fragmentShader: document.getElementById('globeFragmentShader').textContent,
+    //
+    // var shaderMaterial = new THREE.ShaderMaterial({
+    //     uniforms: uniforms,
+    //     vertexShader: document.getElementById('globeVertexShader').textContent,
+    //     fragmentShader: document.getElementById('globeFragmentShader').textContent,
+    // });
+    //
+    // var earthMaterial = new THREE.MeshPhongMaterial({
+    //     map: new THREE.TextureLoader().load("images/map_outline.png"),
+    //     color: 0xaaaaaa,
+    //     specular: 0x333333,
+    //     shininess: 25
+    // });
+    //
+    // var sphere = new THREE.Mesh(new THREE.SphereGeometry(100, 40, 40), earthMaterial);
+    //
+    // sphere.doubleSided = false;
+    //
+    // sphere.rotation.x = Math.PI;
+    // sphere.rotation.y = -Math.PI / 2;
+    // sphere.rotation.z = Math.PI;
+    //
+    // rotating.add(sphere);
+    camera = new THREE.PerspectiveCamera( 12, window.innerWidth / window.innerHeight, 1, 20000 );
+    camera.position.z = 1400;
+    camera.position.y = 0;
+    camera.lookAt(scene.width/2, scene.height/2);
+    var earth = new Earth();
+    rotating = earth.createPlanet({
+        camera: camera,
+        surface: {
+            size: 100,
+            material: {
+                bumpScale: 0.05,
+                specular: new THREE.Color('grey'), // 反射
+                shininess: 10
+            },
+            textures: {
+                map: '../images/earthmap1k.jpg',
+                bumpMap: '../images/earthbump1k.jpg',
+                specularMap: '../images/earthspec1k.jpg'
+            }
+        },
+        atmosphere: {
+            size: 0.003,
+            material: {
+                opacity: 0.8
+            },
+            textures: {
+                map: '../images/earthcloudmap.jpg',
+                alphaMap: '../images/earthcloudmaptrans.jpg'
+            },
+            glow: {
+                size: 0.05,
+                intensity: 0.7,
+                fade: 7,
+                color: 0x93cfef
+            }
+        }
     });
-
-    var earthMaterial = new THREE.MeshPhongMaterial({
-        map: new THREE.TextureLoader().load("images/map_outline.png"),
-        color: 0xaaaaaa,
-        specular: 0x333333,
-        shininess: 25
-    });
-
-    var sphere = new THREE.Mesh(new THREE.SphereGeometry(100, 40, 40), earthMaterial);
-
-    sphere.doubleSided = false;
-
-    sphere.rotation.x = Math.PI;
-    sphere.rotation.y = -Math.PI / 2;
-    sphere.rotation.z = Math.PI;
-
-    rotating.add(sphere);
+    scene.add(rotating);
+    ///
 
     for (var i in spec.timeBins) {
         var bin = spec.timeBins[i].data;
@@ -168,10 +209,7 @@ export function initScene() {
 
     //	-----------------------------------------------------------------------------
     //	Setup our camera
-    camera = new THREE.PerspectiveCamera( 12, window.innerWidth / window.innerHeight, 1, 20000 );
-    camera.position.z = 1400;
-    camera.position.y = 0;
-    camera.lookAt(scene.width/2, scene.height/2);
+
     scene.add( camera );
     spec.camera = camera;
 
