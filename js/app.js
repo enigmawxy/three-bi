@@ -113,9 +113,11 @@ export function initScene() {
                 shininess: 10
             },
             textures: {
-                map: 'images/earthmap1k.jpg',
-                bumpMap: 'images/earthbump1k.jpg',
-                specularMap: 'images/earthspec1k.jpg'
+                // map: 'images/earthmap1k.jpg',
+                // bumpMap: 'images/earthbump1k.jpg',
+                // specularMap: 'images/earthspec1k.jpg'
+                map: 'images/map_indexed.png',
+                bumpMap: 'images/map_outline.png',
             }
         },
         atmosphere: {
