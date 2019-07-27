@@ -101,6 +101,7 @@ export function initScene() {
     camera.position.z = 1400;
     camera.position.y = 0;
     camera.lookAt(scene.width/2, scene.height/2);
+
     var earth = new Earth();
     rotating = earth.createPlanet({
         camera: camera,
@@ -135,7 +136,6 @@ export function initScene() {
         }
     });
     scene.add(rotating);
-    ///
 
     for (var i in spec.timeBins) {
         var bin = spec.timeBins[i].data;
