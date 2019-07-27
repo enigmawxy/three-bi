@@ -86,7 +86,7 @@ export function initScene() {
     sphere.rotation.x = Math.PI;
     sphere.rotation.y = -Math.PI / 2;
     sphere.rotation.z = Math.PI;
-    // sphere.id = "base";
+
     rotating.add(sphere);
 
     for (var i in spec.timeBins) {
@@ -113,6 +113,7 @@ export function initScene() {
     loadGeoData(spec);
     console.timeEnd('loadGeoData');
 
+    // 创建贝塞尔曲线
     console.time('buildDataVizGeometries');
     buildDataVizGeometries();
     console.timeEnd('buildDataVizGeometries');
