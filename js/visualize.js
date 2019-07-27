@@ -323,15 +323,17 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 	});
 
 
-
 	var particleGraphic = new THREE.TextureLoader().load("images/map_mask.png");
 	var particleMat = new THREE.PointsMaterial( { map: particleGraphic, color: 0xffffff, size: 60,
 														blending: THREE.NormalBlending, transparent:true,
 														depthWrite: false, vertexColors: true,
 														sizeAttenuation: true } );
 	particlesGeo.colors = particleColors;
-	particlesGeo.morphAttributes = attributes;
-	var pSystem = new THREE.Points( particlesGeo, shaderMaterial );
+	// particlesGeo.morphAttributes = attributes;
+
+	// 如果使用shaderMaterial会渲染不出来，估计是升级了three.js到84版本的问题
+	var pSystem = new THREE.Points( particlesGeo, particleMat );
+	// var pSystem = new THREE.Points( particlesGeo, shaderMaterial );
 	pSystem.dynamic = true;
 	splineOutline.add( pSystem );
 

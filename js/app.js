@@ -79,7 +79,14 @@ export function initScene() {
         fragmentShader: document.getElementById('globeFragmentShader').textContent,
     });
 
-    var sphere = new THREE.Mesh(new THREE.SphereGeometry(100, 40, 40), shaderMaterial);
+    var earthMaterial = new THREE.MeshPhongMaterial({
+        map: new THREE.TextureLoader().load("images/map_outline.png"),
+        color: 0xaaaaaa,
+        specular: 0x333333,
+        shininess: 25
+    });
+
+    var sphere = new THREE.Mesh(new THREE.SphereGeometry(100, 40, 40), earthMaterial);
 
     sphere.doubleSided = false;
 
