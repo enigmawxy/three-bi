@@ -213,11 +213,13 @@ export function animate() {
     rotating.rotation.x = coords.rotate.x;
     rotating.rotation.y = coords.rotate.y;
 
-    // scene.traverse(scene, function (mesh) {
-    //     if (mesh.update !== undefined) {
-    //         mesh.update();
+    // THREE.SceneUtils.traverse( rotating,
+    //     function(mesh) {
+    //         if (mesh.update !== undefined) {
+    //             mesh.update();
+    //         }
     //     }
-    // });
+    // );
     function traverseHierarchy( root, callback ) {
 
         var n, i, l = root.children.length;
@@ -244,14 +246,6 @@ export function animate() {
     render();
 
     requestAnimationFrame( animate );
-
-    // THREE.SceneUtils.traverse( rotating,
-    //     function(mesh) {
-    //         if (mesh.update !== undefined) {
-    //             mesh.update();
-    //         }
-    //     }
-    // );
 
     for( var i in markers ){
         var marker = markers[i];

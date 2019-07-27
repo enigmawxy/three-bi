@@ -225,7 +225,7 @@ function save(data, filename, mime) {
     }
 }
 
-function wrap(value, min, rangeSize) {
+export function wrap(value, min, rangeSize) {
   rangeSize-=min;
     while (value < min) {
       value += rangeSize;

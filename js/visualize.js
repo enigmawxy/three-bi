@@ -5,7 +5,7 @@ import {dataObject as spec} from './main';
 // 	NormalBlending, PointsMaterial, Points
 // } from "../lib/three/three.module";
 import * as THREE from 'three';
-import {createUtilLineGeometry} from './util';
+import {createUtilLineGeometry, wrap} from './util';
 import {removeMarkerFromCountry, attachMarkerToCountry} from  './markers'
 import {coords} from './mousekeyboard';
 import {d3Graphs} from '../lib/ui.controls';
@@ -216,9 +216,8 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 			}
 
 			//	merge it all together
-			set.lineGeometry.merge(linesGeo);
-			// THREE.GeometryUtils.merge( linesGeo, set.lineGeometry );
-			// Geometry.merge( linesGeo, set.lineGeometry );
+			// set.lineGeometry.merge(linesGeo);
+			THREE.GeometryUtils.merge( linesGeo, set.lineGeometry );
 
 			var particleColor = lastColor.clone();		
 			var points = set.lineGeometry.vertices;
@@ -332,9 +331,6 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 														sizeAttenuation: true } );
 	particlesGeo.colors = particleColors;
 	particlesGeo.morphAttributes = attributes;
-	// var bufferGeometry = new THREE.BufferGeometry().fromGeometry( particlesGeo );
-	// bufferGeometry.attributes = attributes;
-	// particlesGeo.attributes = attributes;
 	var pSystem = new THREE.Points( particlesGeo, shaderMaterial );
 	pSystem.dynamic = true;
 	splineOutline.add( pSystem );
