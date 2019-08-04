@@ -296,11 +296,6 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 
 	splineOutline.renderDepth = false;
 
-	// attributes should now be defined in THREE.BufferGeometry instead.
-	var attributes = {
-		size: { value: [] },
-		customColor: {value: [] }
-	};
 
 	var uniforms = {
 		amplitude: { value: 1.0 },
@@ -310,7 +305,6 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 
 	var shaderMaterial = new THREE.ShaderMaterial( {
 		uniforms: 		uniforms,
-		// attributes:     attributes, // No such attributes in current three version
 		vertexShader:   document.getElementById( 'vertexshader' ).textContent,
 		fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
 		blending: 		THREE.AdditiveBlending,
@@ -331,15 +325,6 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 	var pSystem = new THREE.Points( particlesGeo, shaderMaterial );
 	pSystem.dynamic = true;
 	splineOutline.add( pSystem );
-
-	var vertices = pSystem.geometry.vertices;
-	var values_size = attributes.size.value;
-	var values_color = attributes.customColor.value;
-
-	for( var v = 0; v < vertices.length; v++ ) {		
-		values_size[ v ] = pSystem.geometry.vertices[v].size;
-		values_color[ v ] = particleColors[v];
-	}
 
 	pSystem.update = function(){	
 		// var time = Date.now()									
