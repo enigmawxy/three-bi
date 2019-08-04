@@ -1,4 +1,3 @@
-// import {Geometry, Projector, Vector3, Vector2, ExtrudeGeometry, Shape, Color} from "../lib/three/three.module";
 import * as THREE from 'three';
 import {THREEp} from '../lib/three/Projector';
 

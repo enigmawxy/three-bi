@@ -24,6 +24,35 @@ var controllers = {
     transitionTime: 2000,
 };
 
+const globeVertexShader=`
+        varying vec3 vNormal;
+        varying vec2 vUv;
+        void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0);
+            vNormal = normalize( normalMatrix * normal );
+            vUv = uv;
+        }`;
+
+const globeFragmentShader=` 
+        uniform sampler2D mapIndex;
+        uniform sampler2D lookup;
+        uniform sampler2D outline;
+        uniform float outlineLevel;
+        varying vec3 vNormal;
+        varying vec2 vUv;
+        void main() {
+
+            vec4 mapColor = texture2D( mapIndex, vUv );
+            float indexedColor = mapColor.x;
+            vec2 lookupUV = vec2( indexedColor, 0. );
+            vec4 lookupColor = texture2D( lookup, lookupUV );
+            float mask = lookupColor.x + (1.-outlineLevel) * indexedColor;
+            mask = clamp(mask,0.,1.);
+            float outlineColor = texture2D( outline, vUv ).x * outlineLevel;
+            float diffuse = mask + outlineColor;
+            gl_FragColor = vec4( vec3(diffuse), 1.  );
+        }`;
+
 export function initScene() {
     scene = new THREE.Scene();
     scene.matrixAutoUpdate = false;
@@ -67,8 +96,8 @@ export function initScene() {
     console.log('uniforms');
     var shaderMaterial = new THREE.ShaderMaterial({
         uniforms: uniforms,
-        vertexShader: document.getElementById('globeVertexShader').textContent,
-        fragmentShader: document.getElementById('globeFragmentShader').textContent,
+        vertexShader: globeVertexShader,
+        fragmentShader: globeFragmentShader,
     });
     var sphere = new THREE.Mesh(new THREE.SphereGeometry(100, 40, 40), shaderMaterial);
     sphere.doubleSided = false;

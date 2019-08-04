@@ -1,14 +1,37 @@
 import {dataObject as spec} from './main';
-// import {
-// 	Vector3, CubicBezierCurve3, Geometry, Color, GeometryUtils, Line,
-// 	AdditiveBlending, ShaderMaterial, LineBasicMaterial, TextureLoader,
-// 	NormalBlending, PointsMaterial, Points
-// } from "../lib/three/three.module";
 import * as THREE from 'three';
 import {createUtilLineGeometry, wrap} from './util';
 import {removeMarkerFromCountry, attachMarkerToCountry} from  './markers'
 import {coords} from './mousekeyboard';
 import {d3Graphs} from '../lib/ui.controls';
+
+var vertexshader =`
+ uniform float amplitude;
+        varying vec3 vColor;
+
+        void main() {
+
+            vColor = vec3(0.0, 0.8, 1.0);
+
+            vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+
+            gl_PointSize = 15.0;
+
+            gl_Position = projectionMatrix * mvPosition;
+
+        }`;
+
+var fragmentshader = `uniform vec3 color;
+        uniform sampler2D texture;
+
+        varying vec3 vColor;
+
+        void main() {
+
+            gl_FragColor = vec4( color * vColor, 1.0 );
+            gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+
+        }`;
 
 var globeRadius = 1000;
 var vec3_origin = new THREE.Vector3(0,0,0);
@@ -304,9 +327,11 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 	};
 
 	var shaderMaterial = new THREE.ShaderMaterial( {
-		uniforms: 		uniforms,
-		vertexShader:   document.getElementById( 'vertexshader' ).textContent,
-		fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+		uniforms: 	uniforms,
+		vertexShader: vertexshader,
+		fragmentShader: fragmentshader,
+		// vertexShader:   document.getElementById( 'vertexshader' ).textContent,
+		// fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
 		blending: 		THREE.AdditiveBlending,
 		depthTest: 		true,
 		depthWrite: 	false,
@@ -321,8 +346,8 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 	particlesGeo.colors = particleColors;
 
 	// 如果使用shaderMaterial会渲染不出来，估计是升级了three.js到84版本的问题
-	// var pSystem = new THREE.Points( particlesGeo, particleMat );
-	var pSystem = new THREE.Points( particlesGeo, shaderMaterial );
+	var pSystem = new THREE.Points( particlesGeo, particleMat );
+	// var pSystem = new THREE.Points( particlesGeo, shaderMaterial );
 	pSystem.dynamic = true;
 	splineOutline.add( pSystem );
 

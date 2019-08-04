@@ -1,4 +1,3 @@
-// import {Vector3} from '../lib/three/three.module'
 import * as THREE from 'three';
 export function loadGeoData(spec){
     var rad = 100;

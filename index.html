@@ -16,9 +16,7 @@
 
     <div >
         <table id="marker_template" class="marker" style="left: 0;top: 0"><tr><td><span id="countryText" class="country">
-			</span></td><td class="detail" id="detailText">
-            <!--<span id="detailText" class="detail">
-            </span>--></td></tr></table>
+			</span></td><td class="detail" id="detailText"></td></tr></table>
     </div>
 
     <div id="visualization" >
@@ -29,67 +27,6 @@
         </div>
     </div>
 
-    <script type="x-shader/x-vertex" id="vertexshader">
-        uniform float amplitude;
-        varying vec3 vColor;
-
-        void main() {
-
-            vColor = vec3(0.0, 0.8, 1.0);
-
-            vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-
-            gl_PointSize = 15.0;
-
-            gl_Position = projectionMatrix * mvPosition;
-
-        }
-    </script>
-
-    <script type="x-shader/x-fragment" id="fragmentshader">
-        uniform vec3 color;
-        uniform sampler2D texture;
-
-        varying vec3 vColor;
-
-        void main() {
-
-            gl_FragColor = vec4( color * vColor, 1.0 );
-            gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
-
-        }
-    </script>
-
-    <script id="globeVertexShader" type="x-shader/x-vertex">
-        varying vec3 vNormal;
-        varying vec2 vUv;
-        void main() {
-            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0);
-            vNormal = normalize( normalMatrix * normal );
-            vUv = uv;
-        }
-    </script>
-
-    <script id="globeFragmentShader" type="x-shader/x-fragment">
-        uniform sampler2D mapIndex;
-        uniform sampler2D lookup;
-        uniform sampler2D outline;
-        uniform float outlineLevel;
-        varying vec3 vNormal;
-        varying vec2 vUv;
-        void main() {
-
-            vec4 mapColor = texture2D( mapIndex, vUv );
-            float indexedColor = mapColor.x;
-            vec2 lookupUV = vec2( indexedColor, 0. );
-            vec4 lookupColor = texture2D( lookup, lookupUV );
-            float mask = lookupColor.x + (1.-outlineLevel) * indexedColor;
-            mask = clamp(mask,0.,1.);
-            float outlineColor = texture2D( outline, vUv ).x * outlineLevel;
-            float diffuse = mask + outlineColor;
-            gl_FragColor = vec4( vec3(diffuse), 1.  );
-        }
-    </script>
     <script src="js/main.js" type="text/javascript"></script>
 
     <script type="text/javascript">
