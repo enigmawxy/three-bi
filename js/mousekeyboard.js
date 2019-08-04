@@ -2,7 +2,7 @@ import KeyboardState from "../lib/three/THREEx.kbs";
 import {dataObject} from './main';
 import {countryColorMap, selectVisualization, constrain} from './visualize'
 import {d3Graphs} from '../lib/ui.controls';
-import {getPickColor} from './app'
+import {getPickColor} from './apps'
 
 export var coords = {
 	rotate:  {x: 0, y:0},

@@ -298,30 +298,26 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 
 	// attributes should now be defined in THREE.BufferGeometry instead.
 	var attributes = {
-		size: {	type: 'f', value: [] },
-		customColor: { type: 'c', value: [] }
+		size: { value: [] },
+		customColor: {value: [] }
 	};
 
 	var uniforms = {
-		amplitude: { type: "f", value: 1.0 },
-		color:     { type: "c", value: new THREE.Color( 0xffffff ) },
-		texture:   { type: "t", value: 0, texture: new THREE.TextureLoader().load("images/particleA.png" ) },
+		amplitude: { value: 1.0 },
+		color:     { value: new THREE.Color( 0xffffff ) },
+		texture:   { value: new THREE.TextureLoader().load("images/particleA.png" ) },
 	};
 
 	var shaderMaterial = new THREE.ShaderMaterial( {
-
 		uniforms: 		uniforms,
 		// attributes:     attributes, // No such attributes in current three version
 		vertexShader:   document.getElementById( 'vertexshader' ).textContent,
 		fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
-
 		blending: 		THREE.AdditiveBlending,
 		depthTest: 		true,
 		depthWrite: 	false,
-		transparent:	true,
-		// sizeAttenuation: true,
+		transparent:	true
 	});
-
 
 	var particleGraphic = new THREE.TextureLoader().load("images/map_mask.png");
 	var particleMat = new THREE.PointsMaterial( { map: particleGraphic, color: 0xffffff, size: 60,
@@ -329,11 +325,10 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 														depthWrite: false, vertexColors: true,
 														sizeAttenuation: true } );
 	particlesGeo.colors = particleColors;
-	// particlesGeo.morphAttributes = attributes;
 
 	// 如果使用shaderMaterial会渲染不出来，估计是升级了three.js到84版本的问题
-	var pSystem = new THREE.Points( particlesGeo, particleMat );
-	// var pSystem = new THREE.Points( particlesGeo, shaderMaterial );
+	// var pSystem = new THREE.Points( particlesGeo, particleMat );
+	var pSystem = new THREE.Points( particlesGeo, shaderMaterial );
 	pSystem.dynamic = true;
 	splineOutline.add( pSystem );
 

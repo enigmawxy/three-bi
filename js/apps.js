@@ -43,8 +43,8 @@ export function initScene() {
     light2.position.z = -1000;
     scene.add(light2);
 
-    // rotating = new THREE.Object3D();
-    // scene.add(rotating);
+    rotating = new THREE.Object3D();
+    scene.add(rotating);
 
     var lookupCanvas = document.createElement('canvas');
     lookupCanvas.width = 256;
@@ -57,87 +57,32 @@ export function initScene() {
     lookupTexture.needsUpdate = true;
     spec.lookup.texture = lookupTexture;
 
-    var indexedMapTexture = new THREE.Texture(spec.indexImage);
-    indexedMapTexture.needsUpdate = true;
-    indexedMapTexture.magFilter = THREE.NearestFilter;
-    indexedMapTexture.minFilter = THREE.NearestFilter;
-
-    var outlinedMapTexture = new THREE.Texture(spec.outlineImage);
-    outlinedMapTexture.needsUpdate = true;
-
-    ///
     var uniforms = {
-        'mapIndex': {type: 't', value: 0, texture: indexedMapTexture},
-        'lookup': {type: 't', value: 1, texture: lookupTexture},
-        'outline': {type: 't', value: 2, texture: outlinedMapTexture},
-        'outlineLevel': {type: 'f', value: 1},
+        mapIndex: { value: new THREE.TextureLoader().load('./images/map_indexed.png')  },
+        lookup: { value: lookupTexture },
+        outline: { value: new THREE.TextureLoader().load('./images/map_outline.png') },
+        outlineLevel: {value: 1 },
     };
-
     spec.mapUniforms = uniforms;
-    //
-    // var shaderMaterial = new THREE.ShaderMaterial({
-    //     uniforms: uniforms,
-    //     vertexShader: document.getElementById('globeVertexShader').textContent,
-    //     fragmentShader: document.getElementById('globeFragmentShader').textContent,
-    // });
-    //
-    // var earthMaterial = new THREE.MeshPhongMaterial({
-    //     map: new THREE.TextureLoader().load("images/map_outline.png"),
-    //     color: 0xaaaaaa,
-    //     specular: 0x333333,
-    //     shininess: 25
-    // });
-    //
-    // var sphere = new THREE.Mesh(new THREE.SphereGeometry(100, 40, 40), earthMaterial);
-    //
-    // sphere.doubleSided = false;
-    //
-    // sphere.rotation.x = Math.PI;
-    // sphere.rotation.y = -Math.PI / 2;
-    // sphere.rotation.z = Math.PI;
-    //
-    // rotating.add(sphere);
+    console.log('uniforms');
+    var shaderMaterial = new THREE.ShaderMaterial({
+        uniforms: uniforms,
+        vertexShader: document.getElementById('globeVertexShader').textContent,
+        fragmentShader: document.getElementById('globeFragmentShader').textContent,
+    });
+    var sphere = new THREE.Mesh(new THREE.SphereGeometry(100, 40, 40), shaderMaterial);
+    sphere.doubleSided = false;
+    sphere.rotation.x = Math.PI;
+    sphere.rotation.y = -Math.PI / 2;
+    sphere.rotation.z = Math.PI;
+    rotating.add(sphere);
+
     camera = new THREE.PerspectiveCamera( 12, window.innerWidth / window.innerHeight, 1, 20000 );
     camera.position.z = 1400;
     camera.position.y = 0;
-    camera.lookAt(scene.width/2, scene.height/2);
-
-    var earth = new Earth();
-    rotating = earth.createPlanet({
-        camera: camera,
-        surface: {
-            size: 100,
-            material: {
-                bumpScale: 0.05,
-                specular: new THREE.Color('grey'), // 反射
-                shininess: 10
-            },
-            textures: {
-                // map: 'images/earthmap1k.jpg',
-                // bumpMap: 'images/earthbump1k.jpg',
-                // specularMap: 'images/earthspec1k.jpg'
-                map: 'images/map_indexed.png',
-                bumpMap: 'images/map_outline.png',
-            }
-        },
-        atmosphere: {
-            size: 0.003,
-            material: {
-                opacity: 0.8
-            },
-            textures: {
-                map: 'images/earthcloudmap.jpg',
-                alphaMap: 'images/earthcloudmaptrans.jpg'
-            },
-            glow: {
-                size: 0.05,
-                intensity: 0.7,
-                fade: 7,
-                color: 0x93cfef
-            }
-        }
-    });
-    scene.add(rotating);
+    camera.lookAt(0,0,0);
+    // console.log(scene.width/2, scene.height/2);
+    // camera.lookAt(scene.width/2, scene.height/2);
 
     for (var i in spec.timeBins) {
         var bin = spec.timeBins[i].data;
@@ -260,13 +205,6 @@ export function animate() {
     rotating.rotation.x = coords.rotate.x;
     rotating.rotation.y = coords.rotate.y;
 
-    // THREE.SceneUtils.traverse( rotating,
-    //     function(mesh) {
-    //         if (mesh.update !== undefined) {
-    //             mesh.update();
-    //         }
-    //     }
-    // );
     function traverseHierarchy( root, callback ) {
 
         var n, i, l = root.children.length;
