@@ -6,31 +6,24 @@ import {coords} from './mousekeyboard';
 import {d3Graphs} from '../lib/ui.controls';
 
 var vertexshader =`
- uniform float amplitude;
+ 		uniform float amplitude;
+        attribute float size;
+        attribute vec3 customColor;
         varying vec3 vColor;
-
         void main() {
-
-            vColor = vec3(0.0, 0.8, 1.0);
-
+            vColor = customColor;
             vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-
-            gl_PointSize = 15.0;
-
+            gl_PointSize = size;
             gl_Position = projectionMatrix * mvPosition;
-
         }`;
 
-var fragmentshader = `uniform vec3 color;
+var fragmentshader = `
+		uniform vec3 color;
         uniform sampler2D texture;
-
         varying vec3 vColor;
-
         void main() {
-
             gl_FragColor = vec4( color * vColor, 1.0 );
             gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
-
         }`;
 
 var globeRadius = 1000;
@@ -44,7 +37,7 @@ export function buildDataVizGeometries(){
 		var yearBin = spec.timeBins[i].data;
 
 		var year = spec.timeBins[i].t;
-		selectableYears.push(year);	
+		selectableYears.push(year);
 
 		// console.log('Building data for ...' + year);
 		for( var s in yearBin ){
@@ -55,17 +48,17 @@ export function buildDataVizGeometries(){
 
 			var exporter = spec.countryData[exporterName];
 			var importer = spec.countryData[importerName];
-			
+
 			//	we couldn't find the country, it wasn't in our list...
 			if( exporter === undefined || importer === undefined )
-				continue;			
+				continue;
 
 			//	visualize this event
 			set.lineGeometry = makeConnectionLineGeometry( exporter, importer, set.v, set.wc );
 		}
-	}			
+	}
 
-	loadLayer.style.display = 'none';	
+	loadLayer.style.display = 'none';
 }
 
 
@@ -196,8 +189,9 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 	var linesGeo = new THREE.Geometry();
 	var lineColors = [];
 
-	var particlesGeo = new THREE.Geometry();
-	var particleColors = [];
+	// var particlesGeo = new THREE.Geometry();
+	var particlesGeo = new THREE.BufferGeometry();
+	var particleVertices=[], particleColors = [], particleSizes = [];
 
 	//	go through the data from year, and find all relevant geometries
 	for( i in bin ){
@@ -213,8 +207,8 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 		var useImporter = relevantImport;
 
 		var categoryName = spec.reverseWeaponLookup[set.wc];
-		var relevantExportCategory = relevantExport && $.inArray(categoryName,exportCategories) >= 0;		
-		var relevantImportCategory = relevantImport && $.inArray(categoryName,importCategories) >= 0;		
+		var relevantExportCategory = relevantExport && $.inArray(categoryName,exportCategories) >= 0;
+		var relevantImportCategory = relevantImport && $.inArray(categoryName,importCategories) >= 0;
 
 		if( (useImporter || useExporter) && (relevantExportCategory || relevantImportCategory) ){
 			//	we may not have line geometry... (?)
@@ -242,16 +236,18 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 			// set.lineGeometry.merge(linesGeo);
 			THREE.GeometryUtils.merge( linesGeo, set.lineGeometry );
 
-			var particleColor = lastColor.clone();		
+			var particleColor = lastColor.clone();
+
 			var points = set.lineGeometry.vertices;
 			var particleCount = Math.floor(set.v / 8000 / set.lineGeometry.vertices.length) + 1;
 			particleCount = constrain(particleCount,1,100);
-			var particleSize = set.lineGeometry.size;			
+			var particleSize = set.lineGeometry.size;
+
 			for( var s=0; s<particleCount; s++ ){
 				var desiredIndex = s / particleCount * points.length;
 				var rIndex = constrain(Math.floor(desiredIndex),0,points.length-1);
 
-				var point = points[rIndex];						
+				var point = points[rIndex];
 				var particle = point.clone();
 				particle.moveIndex = rIndex;
 				particle.nextIndex = rIndex+1;
@@ -259,14 +255,18 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 					particle.nextIndex = 0;
 				particle.lerpN = 0;
 				particle.path = points;
-				particlesGeo.vertices.push( particle );	
+				// particlesGeo.vertices.push( particle );
+				particleVertices.push( particle.x, particle.y, particle.z);
+
 				particle.size = particleSize;
-				particleColors.push( particleColor );						
-			}			
+				particleSizes.push(particleSize);
+				particleColors.push( particleColor.r, particleColor.g, particleColor.b);
+				// colorBuffer.setXYZ(s, particleColor.r, particleColor.g, particleColor.b);
+			}
 
 			if( $.inArray( exporterName, affectedCountries ) < 0 ){
 				affectedCountries.push(exporterName);
-			}							
+			}
 
 			if( $.inArray( importerName, affectedCountries ) < 0 ){
 				affectedCountries.push(importerName);
@@ -277,17 +277,17 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 			if( exporterCountry.mapColor === undefined ){
 				exporterCountry.mapColor = vb;
 			}
-			else{				
+			else{
 				exporterCountry.mapColor += vb;
-			}			
+			}
 
 			var importerCountry = spec.countryData[importerName];
 			if( importerCountry.mapColor === undefined ){
 				importerCountry.mapColor = vb;
 			}
-			else{				
+			else{
 				importerCountry.mapColor += vb;
-			}	
+			}
 
 			exporterCountry.exportedAmount += vb;
 			importerCountry.importedAmount += vb;
@@ -295,7 +295,7 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 			if( exporterCountry === spec.selectedCountry ){
 				spec.selectedCountry.summary.exported[set.wc] += set.v;
 				spec.selectedCountry.summary.exported.total += set.v;
-			}		
+			}
 			if( importerCountry === spec.selectedCountry ){
 				spec.selectedCountry.summary.imported[set.wc] += set.v;
 				spec.selectedCountry.summary.imported.total += set.v;
@@ -304,17 +304,17 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 			if( importerCountry === spec.selectedCountry || exporterCountry === spec.selectedCountry ){
 				spec.selectedCountry.summary.total += set.v;
 			}
-		}		
+		}
 	}
 
-	linesGeo.colors = lineColors;	
+	linesGeo.colors = lineColors;
 
 	//	make a final mesh out of this composite
 	var splineOutline = new THREE.Line( linesGeo, new THREE.LineBasicMaterial(
 		{ 	color: 0xffffff, opacity: 1.0, blending:
 			THREE.AdditiveBlending, transparent:true,
-			depthWrite: false, vertexColors: true, 
-			linewidth: 1 } ) 
+			depthWrite: false, vertexColors: true,
+			linewidth: 1 } )
 	);
 
 	splineOutline.renderDepth = false;
@@ -330,8 +330,6 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 		uniforms: 	uniforms,
 		vertexShader: vertexshader,
 		fragmentShader: fragmentshader,
-		// vertexShader:   document.getElementById( 'vertexshader' ).textContent,
-		// fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
 		blending: 		THREE.AdditiveBlending,
 		depthTest: 		true,
 		depthWrite: 	false,
@@ -343,60 +341,68 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 														blending: THREE.NormalBlending, transparent:true,
 														depthWrite: false, vertexColors: true,
 														sizeAttenuation: true } );
-	particlesGeo.colors = particleColors;
+
+	// particlesGeo.colors = particleColors;
+	particlesGeo.addAttribute('color', new THREE.BufferAttribute(new Float32Array(particleColors), 3));
+	particlesGeo.addAttribute('position', new THREE.BufferAttribute(new Float32Array(particleVertices), 3));
+	particlesGeo.addAttribute('size', new THREE.BufferAttribute(new Float32Array(particleSizes), 1 ));
+	particlesGeo.addAttribute('customColor', new THREE.BufferAttribute(new Float32Array(particleColors), 3 ));
+	particlesGeo.computeVertexNormals();
 
 	// 如果使用shaderMaterial会渲染不出来，估计是升级了three.js到84版本的问题
-	var pSystem = new THREE.Points( particlesGeo, particleMat );
+	var pSystem = new THREE.Points( particlesGeo, shaderMaterial );
 	// var pSystem = new THREE.Points( particlesGeo, shaderMaterial );
 	pSystem.dynamic = true;
 	splineOutline.add( pSystem );
-
-	pSystem.update = function(){	
-		// var time = Date.now()									
-		for( var i in this.geometry.vertices ){						
-			var particle = this.geometry.vertices[i];
-			var path = particle.path;
-			var moveLength = path.length;
-			
-			particle.lerpN += 0.05;
-			if(particle.lerpN > 1){
-				particle.lerpN = 0;
-				particle.moveIndex = particle.nextIndex;
-				particle.nextIndex++;
-				if( particle.nextIndex >= path.length ){
-					particle.moveIndex = 0;
-					particle.nextIndex = 1;
-				}
-			}
-
-			var currentPoint = path[particle.moveIndex];
-			var nextPoint = path[particle.nextIndex];
-			
-
-			particle.copy( currentPoint );
-			// particle.lerpSelf( nextPoint, particle.lerpN );
-			particle.x += (nextPoint.x - particle.x) * particle.lerpN;
-			particle.y += (nextPoint.y - particle.y) * particle.lerpN;
-			particle.z += (nextPoint.z - particle.z) * particle.lerpN;
-		}
-		this.geometry.verticesNeedUpdate = true;
-	};		
+	pSystem.update = function() {
+		console.log(this.geometry.attributes.customColor);
+	};
+	// pSystem.update = function(){
+	// 	// var time = Date.now()
+	// 	console.log(this.geometry.vertices);
+	// 	for( var i in this.geometry.vertices ){
+	// 		var particle = this.geometry.vertices[i];
+	// 		var path = particle.path;
+	// 		var moveLength = path.length;
+	//
+	// 		particle.lerpN += 0.05;
+	// 		if(particle.lerpN > 1){
+	// 			particle.lerpN = 0;
+	// 			particle.moveIndex = particle.nextIndex;
+	// 			particle.nextIndex++;
+	// 			if( particle.nextIndex >= path.length ){
+	// 				particle.moveIndex = 0;
+	// 				particle.nextIndex = 1;
+	// 			}
+	// 		}
+	//
+	// 		var currentPoint = path[particle.moveIndex];
+	// 		var nextPoint = path[particle.nextIndex];
+	//
+	// 		particle.copy( currentPoint );
+	// 		// particle.lerpSelf( nextPoint, particle.lerpN );
+	// 		particle.x += (nextPoint.x - particle.x) * particle.lerpN;
+	// 		particle.y += (nextPoint.y - particle.y) * particle.lerpN;
+	// 		particle.z += (nextPoint.z - particle.z) * particle.lerpN;
+	// 	}
+	// 	this.geometry.verticesNeedUpdate = true;
+	// };
 
 	//	return this info as part of the mesh package, we'll use this in selectvisualization
 	splineOutline.affectedCountries = affectedCountries;
 
 
-	return splineOutline;	
+	return splineOutline;
 }
 
 export function selectVisualization( year, countries, exportCategories, importCategories ){
 	//	we're only doing one country for now so...
 	var cName = countries[0].toUpperCase();
-	
+
 	$("#hudButtons .countryTextInput").val(cName);
 	spec.previouslySelectedCountry = spec.selectedCountry;
 	spec.selectedCountry = spec.countryData[countries[0].toUpperCase()];
-    
+
 	spec.selectedCountry.summary = {
 		imported: {
 			mil: 0,
@@ -445,7 +451,7 @@ export function selectVisualization( year, countries, exportCategories, importCa
 	//	alright we got no data but at least highlight the country we've selected
 	if( mesh.affectedCountries.length === 0 ){
 		mesh.affectedCountries.push( cName );
-	}	
+	}
 
 	for( var i in mesh.affectedCountries ) {
 		var countryName = mesh.affectedCountries[i];
@@ -476,7 +482,7 @@ export function selectVisualization( year, countries, exportCategories, importCa
 
 			coords.rotateV.x *= 0.6;
 			coords.rotateV.y *= 0.6;
-		}	
+		}
 	}
 
     d3Graphs.initGraphs(spec);
