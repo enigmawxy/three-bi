@@ -30,14 +30,10 @@ var globeRadius = 1000;
 var vec3_origin = new THREE.Vector3(0,0,0);
 
 export function buildDataVizGeometries(){
-	var selectableYears =[];
 	var loadLayer = document.getElementById('loading');
 
 	for( var i in spec.timeBins ){
 		var yearBin = spec.timeBins[i].data;
-
-		var year = spec.timeBins[i].t;
-		selectableYears.push(year);
 
 		// console.log('Building data for ...' + year);
 		for( var s in yearBin ){
@@ -189,6 +185,8 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 	var linesGeo = new THREE.Geometry();
 	var lineColors = [];
 
+	// 将Geometry改为了使用BufferGeometry， 为了使Shader工作。做了较大修改
+	// ，同时也适应了THREE 105版本
 	// var particlesGeo = new THREE.Geometry();
 	var particlesGeo = new THREE.BufferGeometry();
 	var particleVertices=[], particleColors = [], particleSizes = [];
@@ -266,11 +264,9 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 				pOption.path.push(points);
 				pOption.size.push(particleSize);
 
-				// particlesGeo.vertices.push( particle );
 				particleVertices.push( particle.x, particle.y, particle.z);
 				particleSizes.push(particleSize);
 				particleColors.push( particleColor.r, particleColor.g, particleColor.b);
-				// colorBuffer.setXYZ(s, particleColor.r, particleColor.g, particleColor.b);
 			}
 
 			if( $.inArray( exporterName, affectedCountries ) < 0 ){
@@ -351,7 +347,6 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 														depthWrite: false, vertexColors: true,
 														sizeAttenuation: true } );
 
-	// particlesGeo.colors = particleColors;
 	particlesGeo.addAttribute('color', new THREE.BufferAttribute(new Float32Array(particleColors), 3));
 	const positionAttr = new THREE.BufferAttribute(new Float32Array(particleVertices), 3);
 	positionAttr.dynamic = true;
@@ -362,7 +357,6 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 
 	// 如果使用shaderMaterial会渲染不出来，估计是升级了three.js到84版本的问题
 	var pSystem = new THREE.Points( particlesGeo, shaderMaterial );
-	// var pSystem = new THREE.Points( particlesGeo, shaderMaterial );
 	pSystem.dynamic = true;
 	splineOutline.add( pSystem );
 	pSystem.update = function() {
@@ -397,37 +391,7 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 
 		this.geometry.getAttribute('position').needsUpdate= true;
 	};
-	// pSystem.update = function(){
-	// 	console.log(this.geometry.vertices);
-	// 	for( var i in this.geometry.vertices ){
-	// 		var particle = this.geometry.vertices[i];
-	// 		var path = particle.path;
-	// 		var moveLength = path.length;
-	//
-	// 		particle.lerpN += 0.05;
-	// 		if(particle.lerpN > 1){
-	// 			particle.lerpN = 0;
-	// 			particle.moveIndex = particle.nextIndex;
-	// 			particle.nextIndex++;
-	// 			if( particle.nextIndex >= path.length ){
-	// 				particle.moveIndex = 0;
-	// 				particle.nextIndex = 1;
-	// 			}
-	// 		}
-	//
-	// 		var currentPoint = path[particle.moveIndex];
-	// 		var nextPoint = path[particle.nextIndex];
-	//
-	// 		particle.copy( currentPoint );
-	// 		// particle.lerpSelf( nextPoint, particle.lerpN );
-	// 		particle.x += (nextPoint.x - particle.x) * particle.lerpN;
-	// 		particle.y += (nextPoint.y - particle.y) * particle.lerpN;
-	// 		particle.z += (nextPoint.z - particle.z) * particle.lerpN;
-	// 	}
-	// 	this.geometry.verticesNeedUpdate = true;
-	// };
 
-	//	return this info as part of the mesh package, we'll use this in selectvisualization
 	splineOutline.affectedCountries = affectedCountries;
 
 
@@ -435,7 +399,6 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 }
 
 export function selectVisualization( year, countries, exportCategories, importCategories ){
-	//	we're only doing one country for now so...
 	var cName = countries[0].toUpperCase();
 
 	$("#hudButtons .countryTextInput").val(cName);
@@ -468,7 +431,7 @@ export function selectVisualization( year, countries, exportCategories, importCa
 	}
 
 	//	clear markers
-	for( var i in spec.selectableCountries ){
+	for( i in spec.selectableCountries ){
 		removeMarkerFromCountry( spec.selectableCountries[i]);
 	}
 
@@ -492,9 +455,9 @@ export function selectVisualization( year, countries, exportCategories, importCa
 		mesh.affectedCountries.push( cName );
 	}
 
-	for( var i in mesh.affectedCountries ) {
+	for( i in mesh.affectedCountries ) {
 		var countryName = mesh.affectedCountries[i];
-		var country = spec.countryData[countryName];
+		country = spec.countryData[countryName];
 		attachMarkerToCountry(countryName, country.mapColor);
 	}
 
@@ -572,12 +535,11 @@ export function highlightCountry(countries ){
 
 	var selectedCountryCode = spec.selectedCountry.countryCode;
 
-	for( var i in countryCodes ){
+	for( i in countryCodes ){
 		var countryCode = countryCodes[i];
 		var colorIndex = countryColorMap[ countryCode ];
 
 		var mapColor = spec.countryData[countries[i]].mapColor;
-		// var fillCSS = '#ff0000';
 		var fillCSS = '#333333';
 		if( countryCode === selectedCountryCode )
 			fillCSS = '#eeeeee';
@@ -622,6 +584,6 @@ function getHistoricalData(){
 		}
 		history.push(value);
 	}
-	// console.log(history);
+
 	return history;
 }
