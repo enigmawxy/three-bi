@@ -192,6 +192,13 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 	// var particlesGeo = new THREE.Geometry();
 	var particlesGeo = new THREE.BufferGeometry();
 	var particleVertices=[], particleColors = [], particleSizes = [];
+	var pOption = {
+		moveIndex: [],
+		nextIndex: [],
+		lerpN: [],
+		path: [],
+		size: []
+	};
 
 	//	go through the data from year, and find all relevant geometries
 	for( i in bin ){
@@ -249,16 +256,18 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 
 				var point = points[rIndex];
 				var particle = point.clone();
-				particle.moveIndex = rIndex;
-				particle.nextIndex = rIndex+1;
-				if(particle.nextIndex >= points.length )
-					particle.nextIndex = 0;
-				particle.lerpN = 0;
-				particle.path = points;
+
+				pOption.moveIndex.push(rIndex);
+				var nextIndex = rIndex+1;
+				if(nextIndex >= points.length )
+					nextIndex = 0;
+				pOption.nextIndex.push(nextIndex);
+				pOption.lerpN.push(0);
+				pOption.path.push(points);
+				pOption.size.push(particleSize);
+
 				// particlesGeo.vertices.push( particle );
 				particleVertices.push( particle.x, particle.y, particle.z);
-
-				particle.size = particleSize;
 				particleSizes.push(particleSize);
 				particleColors.push( particleColor.r, particleColor.g, particleColor.b);
 				// colorBuffer.setXYZ(s, particleColor.r, particleColor.g, particleColor.b);
@@ -344,7 +353,9 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 
 	// particlesGeo.colors = particleColors;
 	particlesGeo.addAttribute('color', new THREE.BufferAttribute(new Float32Array(particleColors), 3));
-	particlesGeo.addAttribute('position', new THREE.BufferAttribute(new Float32Array(particleVertices), 3));
+	const positionAttr = new THREE.BufferAttribute(new Float32Array(particleVertices), 3);
+	positionAttr.dynamic = true;
+	particlesGeo.addAttribute('position', positionAttr);
 	particlesGeo.addAttribute('size', new THREE.BufferAttribute(new Float32Array(particleSizes), 1 ));
 	particlesGeo.addAttribute('customColor', new THREE.BufferAttribute(new Float32Array(particleColors), 3 ));
 	particlesGeo.computeVertexNormals();
@@ -355,10 +366,38 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 	pSystem.dynamic = true;
 	splineOutline.add( pSystem );
 	pSystem.update = function() {
-		console.log(this.geometry.attributes.customColor);
+		const length = this.geometry.attributes.position.array.length;
+		var vertices = this.geometry.attributes.position.array;
+		for(var i =0, j=0 ; i< length; i=i+3, j++) {
+			var path = pOption.path[j];
+
+			pOption.lerpN[j] +=0.05;
+			if(pOption.lerpN[j] > 1) {
+				pOption.lerpN[j] = 0;
+				pOption.moveIndex[j] = pOption.nextIndex[j];
+				pOption.nextIndex[j]++;
+				if( pOption.nextIndex[j] >= path.length ){
+					pOption.moveIndex[j] = 0;
+					pOption.nextIndex[j] = 1;
+				}
+			}
+
+			var currentPoint = path[pOption.moveIndex[j]];
+			var nextPoint = path[pOption.nextIndex[j]];
+
+			// particle.copy( currentPoint );
+			vertices[i] = currentPoint.x;
+			vertices[i+1] = currentPoint.y;
+			vertices[i+2] = currentPoint.z;
+
+			vertices[i] += (nextPoint.x - vertices[i]) * pOption.lerpN[j];
+			vertices[i+1] += (nextPoint.y - vertices[i+1]) * pOption.lerpN[j];
+			vertices[i+2] += (nextPoint.z - vertices[i+2]) * pOption.lerpN[j];
+		}
+
+		this.geometry.getAttribute('position').needsUpdate= true;
 	};
 	// pSystem.update = function(){
-	// 	// var time = Date.now()
 	// 	console.log(this.geometry.vertices);
 	// 	for( var i in this.geometry.vertices ){
 	// 		var particle = this.geometry.vertices[i];
