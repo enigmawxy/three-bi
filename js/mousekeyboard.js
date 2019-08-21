@@ -45,7 +45,7 @@ export function onDocumentMouseDown( event ) {
     pressY = coords.mouse.y;
     coords.rotateT.x = undefined;
     coords.rotateT.x = undefined;
-}	
+}
 
 export function onDocumentMouseUp( event ){
 	d3Graphs.zoomBtnMouseup();
@@ -56,9 +56,9 @@ export function onDocumentMouseUp( event ){
 export function onClick( event ){
 	//	make the rest not work if the event was actually a drag style click
 	if( Math.abs(pressX - coords.mouse.x) > 3 || Math.abs(pressY - coords.mouse.y) > 3 )
-		return;				
+		return;
 
-	var pickColorIndex = getPickColor();	
+	var pickColorIndex = getPickColor();
 	//	find it
 	for( var i in countryColorMap ){
 		var countryCode = i;
@@ -66,7 +66,7 @@ export function onClick( event ){
 		if( pickColorIndex === countryColorIndex ){
 			var countryName = dataObject.countryLookup[countryCode];
 			if( countryName === undefined )
-				return;			
+				return;
 			if( $.inArray(countryName, dataObject.selectableCountries) <= -1 )
 				return;
 
@@ -76,7 +76,7 @@ export function onClick( event ){
 
 			return;
 		}
-	}	
+	}
 }
 
 export function onKeyDown( event ){
@@ -92,7 +92,7 @@ export function onMouseWheel( event ){
 
 	if (event.wheelDelta) { /* IE/Opera. */
 		delta = event.wheelDelta/120;
-	} 
+	}
 	//	firefox
 	else if( event.detail ){
 		delta = -event.detail/3;
@@ -100,8 +100,26 @@ export function onMouseWheel( event ){
 
 	if (delta) handleMWheel(delta);
 
-	event.returnValue = false;			
-}	
+	event.returnValue = false;
+}
 
 export function onDocumentResize(e){
+}
+
+export function onWindowResize() {
+	var minWidth = 1280;
+	var w = window.innerWidth;
+	if(w < minWidth) {
+		w = minWidth;
+	}
+
+	// set the aspect ratio to match the new browser window aspect ratio
+	dataObject.camera.aspect = w / window.innerHeight;
+
+	// update the camera's frustum
+	dataObject.camera.updateProjectionMatrix();
+
+	// update the size of the renderer AND the canvas
+	dataObject.render.setSize( w, window.innerHeight );
+
 }

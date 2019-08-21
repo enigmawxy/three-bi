@@ -5,9 +5,8 @@ import {loadGeoData} from './geopins';
 import '../lib/jquery-1.7.1.min'
 import {buildDataVizGeometries, selectVisualization} from './visualize';
 import {TWEEN} from "../lib/Tween";
-import {THREEx} from "../lib/three/THREEx.WindowResize";
 import {onDocumentMouseMove, onDocumentResize, onDocumentMouseDown,
-        onDocumentMouseUp, onMouseWheel, onClick, onKeyDown, coords} from './mousekeyboard';
+        onDocumentMouseUp, onMouseWheel, onClick, onKeyDown, coords, onWindowResize} from './mousekeyboard';
 import {highlightCountry} from './visualize';
 import {markers} from './markers';
 
@@ -177,13 +176,16 @@ export function initScene() {
 
     document.addEventListener( 'keydown', onKeyDown, false);
 
+    window.addEventListener( 'resize', onWindowResize, false );
+
     //	-----------------------------------------------------------------------------
     //	Setup our camera
 
     scene.add( camera );
     spec.camera = camera;
+    spec.render = renderer;
 
-    THREEx.WindowResize(renderer, camera);
+    // THREEx.WindowResize(renderer, camera);
 }
 
 export function animate() {
