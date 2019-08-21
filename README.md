@@ -2,6 +2,10 @@
 一个基于THREE开发的交互式报表系统, 支持ThreeJS版本105.
 这是一个基于地球分布的销售交互系统，可以用于开发类似项目的模版使用。
 
+![截图1](./images/screenshot1.png)
+
+![截图2](./images/screenshot2.png)
+
 #### 更新日志
 
 6、修改 getVisualizedMesh 中粒子实现的方法，改为由 THREE.Geometry()改为 THREE.BufferGeometry
