@@ -110,8 +110,6 @@ export function initScene() {
     camera.position.z = 1400;
     camera.position.y = 0;
     camera.lookAt(0,0,0);
-    // console.log(scene.width/2, scene.height/2);
-    // camera.lookAt(scene.width/2, scene.height/2);
 
     for (var i in spec.timeBins) {
         var bin = spec.timeBins[i].data;
@@ -148,7 +146,6 @@ export function initScene() {
     spec.rotating = rotating;
     spec.visualizationMesh = visualizationMesh;
 
-    // buildGUI(); 忽略
     selectVisualization('2010', ['UNITED STATES'], ['Military Weapons','Civilian Weapons', 'Ammunition'], ['Military Weapons','Civilian Weapons', 'Ammunition'] );
 
     //	-----------------------------------------------------------------------------
@@ -156,7 +153,6 @@ export function initScene() {
     renderer = new THREE.WebGLRenderer({antialias:false});
     renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.autoClear = false;
-
     renderer.sortObjects = false;
     renderer.generateMipmaps = false;
 
@@ -167,8 +163,6 @@ export function initScene() {
     document.addEventListener( 'mousemove', onDocumentMouseMove, true );
     document.addEventListener( 'windowResize', onDocumentResize, false );
 
-    //masterContainer.addEventListener( 'mousedown', onDocumentMouseDown, true );
-    //masterContainer.addEventListener( 'mouseup', onDocumentMouseUp, false );
     document.addEventListener( 'mousedown', onDocumentMouseDown, true );
     document.addEventListener( 'mouseup', onDocumentMouseUp, false );
 
@@ -255,7 +249,7 @@ export function animate() {
            mesh.update();
         }
     });
-    
+
 
     render();
 
