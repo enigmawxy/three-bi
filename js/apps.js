@@ -1,13 +1,12 @@
 import {dataObject as spec} from './main';
 import * as THREE from 'three';
-import Earth from './earth';
+// import Earth from 'earth';
 import {loadGeoData} from './geopins';
 import '../lib/jquery-1.7.1.min'
-import {buildDataVizGeometries, selectVisualization} from './visualize';
+import {buildDataVizGeometries, selectVisualization, highlightCountry} from './visualize';
 import {TWEEN} from "../lib/Tween";
 import {onDocumentMouseMove, onDocumentResize, onDocumentMouseDown,
         onDocumentMouseUp, onMouseWheel, onClick, onKeyDown, coords, onWindowResize} from './mousekeyboard';
-import {highlightCountry} from './visualize';
 import {markers} from './markers';
 
 var camera, scene, renderer, controls, rotating;
@@ -55,22 +54,39 @@ const globeFragmentShader=`
 export function initScene() {
     scene = new THREE.Scene();
     scene.matrixAutoUpdate = false;
+    
+    /* 灯光*/
+    {
+        scene.add(new THREE.AmbientLight(0x505050));
 
-    scene.add(new THREE.AmbientLight(0x505050));
+        var light1 = new THREE.SpotLight(0xeeeeee, 3);
+        light1.position.x = 730;
+        light1.position.y = 520;
+        light1.position.z = 626;
+        light1.castShadow = true;
+        scene.add(light1);
 
-    var light1 = new THREE.SpotLight(0xeeeeee, 3);
-    light1.position.x = 730;
-    light1.position.y = 520;
-    light1.position.z = 626;
-    light1.castShadow = true;
-    scene.add(light1);
+        var light2 = new THREE.PointLight(0x222222, 14.8);
+        light2.position.x = -640;
+        light2.position.y = -500;
+        light2.position.z = -1000;
+        scene.add(light2);
+    }
+    /*
+				The scene graph looks like this:
 
-    var light2 = new THREE.PointLight(0x222222, 14.8);
-    light2.position.x = -640;
-    light2.position.y = -500;
-    light2.position.z = -1000;
-    scene.add(light2);
+				             Scene
+			  				   |
+			                 Rotating(3D)
+				/------------- | --------\
+			    |                        |
+	 			Sphere(Earth)          visualizationMesh(3D)
+	 			                         |
+	 			                       splineOutline(curve)
+	 				                     |
+	 				                   pSystem(particles)
 
+	*/
     rotating = new THREE.Object3D();
     scene.add(rotating);
 
@@ -86,13 +102,13 @@ export function initScene() {
     spec.lookup.texture = lookupTexture;
 
     var uniforms = {
-        mapIndex: { value: new THREE.TextureLoader().load('./images/map_indexed.png')  },
+        mapIndex: { value: new THREE.TextureLoader().load('images/map_indexed.png')  },
         lookup: { value: lookupTexture },
-        outline: { value: new THREE.TextureLoader().load('./images/map_outline.png') },
+        outline: { value: new THREE.TextureLoader().load('images/map_outline.png') },
         outlineLevel: {value: 1 },
     };
     spec.mapUniforms = uniforms;
-    console.log('uniforms');
+
     var shaderMaterial = new THREE.ShaderMaterial({
         uniforms: uniforms,
         vertexShader: globeVertexShader,
@@ -184,8 +200,6 @@ export function initScene() {
     scene.add( camera );
     spec.camera = camera;
     spec.render = renderer;
-
-    // THREEx.WindowResize(renderer, camera);
 }
 
 export function animate() {
@@ -194,7 +208,8 @@ export function animate() {
         coords.rotateV.x += (coords.rotateT.x - coords.rotate.x) * 0.012;
         coords.rotateV.y += (coords.rotateT.y - coords.rotate.y) * 0.012;
 
-        if( Math.abs(coords.rotateT.x - coords.rotate.x) < 0.1 && Math.abs(coords.rotateT.y - coords.rotate.y) < 0.1 ){
+        if( Math.abs(coords.rotateT.x - coords.rotate.x) < 0.1 &&
+            Math.abs(coords.rotateT.y - coords.rotate.y) < 0.1 ){
             coords.rotateT.x = undefined;
             coords.rotateT.y = undefined;
         }
@@ -216,11 +231,11 @@ export function animate() {
     //	constrain the pivot up/down to the poles
     //	force a bit of bounce back action when hitting the poles
     var rotateXMax = 90 * Math.PI/180;
-    if(coords.rotate.x < -rotateXMax){
+    if(coords.rotate.x < -rotateXMax) {
         coords.rotate.x = -rotateXMax;
         coords.rotateV.x *= -0.95;
     }
-    if(coords.rotate.x > rotateXMax){
+    if(coords.rotate.x > rotateXMax) {
         coords.rotate.x = rotateXMax;
         coords.rotateV.x *= -0.95;
     }
@@ -252,7 +267,6 @@ export function animate() {
         }
     });
 
-
     render();
 
     requestAnimationFrame( animate );
@@ -282,7 +296,7 @@ export function getPickColor(){
     renderer.autoClearColor = false;
     renderer.autoClearDepth = false;
     renderer.autoClearStencil = false;
-    renderer.preserve
+    // renderer.preserve
 
     renderer.clear();
     renderer.render(scene,camera);

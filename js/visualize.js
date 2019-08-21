@@ -150,7 +150,6 @@ function makeConnectionLineGeometry( exporter, importer, value, type ){
 	size = constrain(size,0.1, 60);
 
 	//	create a line geometry out of these
-	// var curveGeometry = Curve.Utils.createLineGeometry( points );
 	var curveGeometry = createUtilLineGeometry( points );
 
 	curveGeometry.size = size;
@@ -319,7 +318,7 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 		{ 	color: 0xffffff, opacity: 1.0, blending:
 			THREE.AdditiveBlending, transparent:true,
 			depthWrite: false, vertexColors: true,
-			linewidth: 1 } )
+			lineWidth: 1 } )
 	);
 
 	splineOutline.renderDepth = false;
