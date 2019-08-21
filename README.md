@@ -1,6 +1,6 @@
-#### THREE-BI系统
-一个基于THREE开发的交互式报表系统, 支持ThreeJS版本105.
-这是一个基于地球分布的销售交互系统，可以用于开发类似项目的模版使用。
+#### THREE-BI系统介绍
+
+一个基于THREE开发的交互式报表系统, 支持ThreeJS版本105, 这是一个基于地球分布的销售交互系统，可以用于开发类似项目的模版使用。
 
 ![截图1](./images/screenshot1.png)
 
@@ -20,16 +20,22 @@
 
 1、这是从一个类似的项目工程基础上修改更新而来，首先向原创者致敬！
 
-#### 安装
+#### 安装使用
 
 1、克隆本项目
 ```javascript
-git clone -b three https://github.com/enigmawxy/three-bi.git
+git clone https://github.com/enigmawxy/three-bi.git
 ```
 
 2、依次运行如下命令：
 ```js
 npm install
+```
+
+3、把json，images目录拷贝到 dist 目录下
+
+
+4、启动
+```js
 npm start
 ```
-如果启动出现不显示问题， 请把json，images目录拷贝到dist目录下
