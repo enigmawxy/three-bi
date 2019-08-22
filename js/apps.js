@@ -286,8 +286,8 @@ export function getPickColor(){
     var gl = renderer.context;
     gl.preserveDrawingBuffer = true;
 
-    var mx = ( coords.mouse.x + renderer.context.canvas.width/2 );//(mouseX + renderer.context.canvas.width/2) * 0.25;
-    var my = ( -coords.mouse.y + renderer.context.canvas.height/2 );//(-mouseY + renderer.context.canvas.height/2) * 0.25;
+    var mx = ( coords.mouse.x + renderer.context.canvas.width/2 );
+    var my = ( -coords.mouse.y + renderer.context.canvas.height/2 );
     mx = Math.floor( mx );
     my = Math.floor( my );
 
