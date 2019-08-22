@@ -1,6 +1,5 @@
 import {dataObject as spec} from './main';
 import * as THREE from 'three';
-// import Earth from 'earth';
 import {loadGeoData} from './geopins';
 import '../lib/jquery-1.7.1.min'
 import {buildDataVizGeometries, selectVisualization, highlightCountry} from './visualize';
