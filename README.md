@@ -8,6 +8,8 @@
 
 #### 更新日志
 
+7、Rotating的遍历改为新版THREE的方式
+
 6、修改 getVisualizedMesh 中粒子实现的方法，改为由 THREE.Geometry()改为 THREE.BufferGeometry
 
 5、整理JS代码，变量传递统一改为 dataObject 对象

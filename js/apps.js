@@ -54,7 +54,7 @@ const globeFragmentShader=`
 export function initScene() {
     scene = new THREE.Scene();
     scene.matrixAutoUpdate = false;
-    
+
     /* 灯光*/
     {
         scene.add(new THREE.AmbientLight(0x505050));
@@ -73,18 +73,18 @@ export function initScene() {
         scene.add(light2);
     }
     /*
-				The scene graph looks like this:
+        The scene graph looks like this:
 
-				             Scene
-			  				   |
-			                 Rotating(3D)
-				/------------- | --------\
-			    |                        |
-	 			Sphere(Earth)          visualizationMesh(3D)
-	 			                         |
-	 			                       splineOutline(curve)
-	 				                     |
-	 				                   pSystem(particles)
+                     Scene
+                       |
+                     Rotating(3D)
+        /------------- | --------\
+        |                        |
+        Sphere(Earth)          visualizationMesh(3D)
+                                 |
+                               splineOutline(curve)
+                                 |
+                               pSystem(particles)
 
 	*/
     rotating = new THREE.Object3D();
@@ -161,7 +161,7 @@ export function initScene() {
     spec.rotating = rotating;
     spec.visualizationMesh = visualizationMesh;
 
-    selectVisualization('2010', ['UNITED STATES'], ['Military Weapons','Civilian Weapons', 'Ammunition'], ['Military Weapons','Civilian Weapons', 'Ammunition'] );
+    selectVisualization('2010', ['CHINA'], ['Military Weapons','Civilian Weapons', 'Ammunition'], ['Military Weapons','Civilian Weapons', 'Ammunition'] );
 
     //	-----------------------------------------------------------------------------
     //	Setup our renderer
@@ -245,27 +245,10 @@ export function animate() {
     rotating.rotation.x = coords.rotate.x;
     rotating.rotation.y = coords.rotate.y;
 
-    function traverseHierarchy( root, callback ) {
-
-        var n, i, l = root.children.length;
-
-        for ( i = 0; i < l; i ++ ) {
-
-            n = root.children[ i ];
-
-            callback( n );
-
-            traverseHierarchy( n, callback );
-
-        }
-
-    }
-
-    traverseHierarchy(rotating, function (mesh) {
-        if (mesh.update !== undefined) {
-           mesh.update();
-        }
-    });
+    rotating.traverse( ( child ) => {
+        if(child.update !== undefined)
+            child.update();
+    } );
 
     render();
 
@@ -310,9 +293,8 @@ export function getPickColor(){
     my = Math.floor( my );
 
     var buf = new Uint8Array( 4 );
-    // console.log(buf);
+
     gl.readPixels( mx, my, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, buf );
-    // console.log(buf);
 
     renderer.autoClear = true;
     renderer.autoClearColor = true;
@@ -327,5 +309,6 @@ export function getPickColor(){
     if( affectedCountries !== undefined ){
         highlightCountry(affectedCountries);
     }
+
     return buf[0];
 }
