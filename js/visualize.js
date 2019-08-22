@@ -237,8 +237,9 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 			}
 
 			//	merge it all together
-			// set.lineGeometry.merge(linesGeo);
-			THREE.GeometryUtils.merge( linesGeo, set.lineGeometry );
+			// 新版THREE合并网格对象变化了，THREE.GeometryUtils.merge废弃掉了
+			linesGeo.merge(set.lineGeometry, set.lineGeometry.matrix);
+			// THREE.GeometryUtils.merge( linesGeo, set.lineGeometry );
 
 			var particleColor = lastColor.clone();
 
@@ -318,7 +319,7 @@ export function getVisualizedMesh(year, countries, exportCategories, importCateg
 		{ 	color: 0xffffff, opacity: 1.0, blending:
 			THREE.AdditiveBlending, transparent:true,
 			depthWrite: false, vertexColors: true,
-			lineWidth: 1 } )
+			linewidth: 1 } )
 	);
 
 	splineOutline.renderDepth = false;
