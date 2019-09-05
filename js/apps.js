@@ -160,7 +160,7 @@ export function initScene() {
     spec.rotating = rotating;
     spec.visualizationMesh = visualizationMesh;
 
-    selectVisualization('2010', ['CHINA'], ['Military Weapons','Civilian Weapons', 'Ammunition'], ['Military Weapons','Civilian Weapons', 'Ammunition'] );
+    selectVisualization('2010', ['UNITED STATES'], ['Military Weapons','Civilian Weapons', 'Ammunition'], ['Military Weapons','Civilian Weapons', 'Ammunition'] );
 
     //	-----------------------------------------------------------------------------
     //	Setup our renderer
