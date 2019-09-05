@@ -27,6 +27,7 @@
     "parcel-bundler": "^1.12.3"
   },
   "dependencies": {
+    "giojs": "^2.2.2",
     "three": "^0.105.0"
   }
 }
