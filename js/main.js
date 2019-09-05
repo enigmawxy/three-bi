@@ -10,7 +10,8 @@ export var dataObject = {
     'selectedCountry': null,
     'previouslySelectedCountry': null,
     'lookup': {'canvas': null, 'texture': null},
-    'reverseWeaponLookup': {'ammo': 'Ammunition', 'civ':  'Civilian Weapons', 'mil':  'Military Weapons'}
+    // 'reverseWeaponLookup': {'ammo': 'Ammunition', 'civ':  'Civilian Weapons', 'mil':  'Military Weapons'}
+    'reverseWeaponLookup': {'mil':  'Military Weapons', 'civ':  'Civilian Weapons', 'ammo': 'Ammunition',  }
 };
 
 // Main program entry
