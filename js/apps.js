@@ -8,7 +8,8 @@ import {onDocumentMouseMove, onDocumentResize, onDocumentMouseDown,
         onDocumentMouseUp, onMouseWheel, onClick, onKeyDown, coords, onWindowResize} from './mousekeyboard';
 import {markers} from './markers';
 
-var camera, scene, renderer, controls, rotating;
+var scene, renderer, controls, rotating;
+export var camera;
 //	where in html to hold all our things
 var glContainer = document.getElementById( 'glContainer' );
 var masterContainer = document.getElementById('visualization');
